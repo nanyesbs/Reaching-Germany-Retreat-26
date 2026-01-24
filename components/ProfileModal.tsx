@@ -62,7 +62,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
         <div className="flex flex-col md:flex-row w-full h-full">
           {/* Bio Image View - Mobile: Integrated Hero, Desktop: Full Height */}
           <div className="relative w-full md:w-[45%] bg-black dark:bg-stone-100 flex flex-col shrink-0">
-            <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden shadow-2xl md:shadow-none">
+            <div className="relative w-full aspect-[3/4] md:aspect-auto md:h-full overflow-hidden shadow-2xl md:shadow-none">
               <img
                 key={imgSrc}
                 src={imgSrc}
@@ -131,11 +131,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
             </div>
 
             <div className="mb-8 md:mb-10">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white dark:text-black leading-[1.05] mb-4 md:mb-6 uppercase tracking-tighter">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold text-white dark:text-black leading-[1.05] mb-4 md:mb-6 uppercase tracking-tighter">
                 {participant.name}
               </h2>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                <p className="text-base sm:text-lg md:text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
+                <p className="text-sm sm:text-lg md:text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
                 <div className="hidden sm:block w-1 h-1 rounded-full bg-brand-heaven-gold opacity-30" />
                 <p className="text-[10px] md:text-[12px] font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
               </div>

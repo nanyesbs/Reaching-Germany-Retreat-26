@@ -338,34 +338,46 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
               <div className="grid grid-cols-2 gap-6 p-4 bg-white/5 dark:bg-black/5 rounded-card border border-white/5">
                 <div className="space-y-3">
-                  <label className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest">Portrait URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    className="w-full bg-white/5 border border-white/10 p-2 rounded text-xs text-white"
-                    value={formData.photoUrl || ''}
-                    onChange={e => setFormData({ ...formData, photoUrl: e.target.value })}
-                  />
+                  <label className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest">Portrait URL or Upload</label>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      placeholder="Paste URL..."
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded text-xs text-white"
+                      value={formData.photoUrl || ''}
+                      onChange={e => setFormData({ ...formData, photoUrl: e.target.value })}
+                    />
+                    <div onClick={() => profileFileRef.current?.click()} className="py-2 px-3 bg-white/5 border border-dashed border-white/20 rounded cursor-pointer hover:bg-white/10 flex items-center justify-center gap-2 text-[10px] uppercase text-white/60 hover:text-white transition-all">
+                      <UploadCloud size={14} /> Upload File
+                    </div>
+                  </div>
                   {formData.photoUrl && (
                     <div className="aspect-square rounded-card border-2 border-white/10 overflow-hidden relative mt-2">
                       <img src={formData.photoUrl} className="w-full h-full object-cover" />
                     </div>
                   )}
+                  <input type="file" ref={profileFileRef} className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'photoUrl')} />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest">Promotional URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    className="w-full bg-white/5 border border-white/10 p-2 rounded text-xs text-white"
-                    value={formData.promoPhotoUrl || ''}
-                    onChange={e => setFormData({ ...formData, promoPhotoUrl: e.target.value })}
-                  />
+                  <label className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest">Promotional URL or Upload</label>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      placeholder="Paste URL..."
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded text-xs text-white"
+                      value={formData.promoPhotoUrl || ''}
+                      onChange={e => setFormData({ ...formData, promoPhotoUrl: e.target.value })}
+                    />
+                    <div onClick={() => promoFileRef.current?.click()} className="py-2 px-3 bg-white/5 border border-dashed border-white/20 rounded cursor-pointer hover:bg-white/10 flex items-center justify-center gap-2 text-[10px] uppercase text-white/60 hover:text-white transition-all">
+                      <UploadCloud size={14} /> Upload File
+                    </div>
+                  </div>
                   {formData.promoPhotoUrl && (
                     <div className="aspect-square rounded-card border-2 border-white/10 overflow-hidden relative mt-2">
                       <img src={formData.promoPhotoUrl} className="w-full h-full object-cover" />
                     </div>
                   )}
+                  <input type="file" ref={promoFileRef} className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'promoPhotoUrl')} />
                 </div>
               </div>
 

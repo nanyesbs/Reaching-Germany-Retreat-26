@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({
     isAdminAuthorized
 }) => {
     return (
-        <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/80 dark:bg-white/80 backdrop-blur-xl border-b border-white/10 dark:border-black/5 px-8 py-4">
+        <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/80 dark:bg-white/80 backdrop-blur-xl border-b border-white/10 dark:border-black/5 px-4 md:px-8 py-4">
             <div className="max-w-[1400px] mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="h-10 w-auto">

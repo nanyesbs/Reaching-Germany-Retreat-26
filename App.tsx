@@ -110,10 +110,10 @@ const App: React.FC = () => {
 
       {viewMode === 'directory' && <Header darkMode={darkMode} />}
 
-      <main className="max-w-[1400px] mx-auto px-8 py-32">
+      <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-24 md:py-32">
         <div className="flex flex-col gap-20 mb-32">
           {viewMode === 'directory' && (
-            <div className="flex flex-col xl:flex-row justify-between items-center gap-10 border-b border-white/10 dark:border-black/5 pb-10">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 md:gap-10 border-b border-white/10 dark:border-black/5 pb-8 md:pb-10">
               <div className="flex flex-col">
                 <h2 className="text-2xl font-avenir-bold text-white dark:text-black uppercase tracking-tighter">Identity Core</h2>
                 <p className="text-[10px] text-white/40 dark:text-black/40 uppercase tracking-[0.2em]">Synchronized Database Nodes</p>
@@ -158,7 +158,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 bg-white/5 dark:bg-black/5 border border-white/5 dark:border-black/5 p-8 rounded-card shadow-card">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 bg-white/5 dark:bg-black/5 border border-white/5 dark:border-black/5 p-5 md:p-8 rounded-card shadow-card">
                 <div className="space-y-4">
                   <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2">
                     <Globe size={12} /> Geographic Hub
@@ -201,7 +201,7 @@ const App: React.FC = () => {
             <p className="text-[10px] text-brand-heaven-gold uppercase font-avenir-medium tracking-widest">Synchronizing Identity Stream...</p>
           </div>
         ) : viewMode === 'directory' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {filteredParticipants.map(p => (
               <ParticipantCard key={p.id} participant={p} onClick={() => setSelectedParticipant(p)} />
             ))}

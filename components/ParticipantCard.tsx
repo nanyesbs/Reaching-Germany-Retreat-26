@@ -33,7 +33,7 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({ participant, onClick 
   return (
     <div
       onClick={onClick}
-      className="group relative bg-black dark:bg-stone-50 border border-white/10 dark:border-stone-200 hover:border-brand-heaven-gold transition-all duration-500 cursor-pointer overflow-hidden p-8 flex flex-col items-center text-center rounded-card shadow-card hover:shadow-2xl hover:-translate-y-1"
+      className="group relative bg-black dark:bg-stone-50 border border-white/10 dark:border-stone-200 hover:border-brand-heaven-gold transition-all duration-500 cursor-pointer overflow-hidden p-6 md:p-8 flex flex-col items-center text-center rounded-card shadow-card hover:shadow-2xl hover:-translate-y-1"
     >
       {/* 1. Profile Picture (Coloring & Flags) */}
       <div className="relative mb-8 w-full aspect-square max-w-[200px]">

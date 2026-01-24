@@ -60,9 +60,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
         </button>
 
         <div className="flex flex-col md:flex-row w-full h-full">
-          {/* Bio Image View */}
-          <div className="relative w-full md:w-[45%] bg-black dark:bg-stone-100 flex flex-col overflow-hidden">
-            <div className="relative aspect-[3/4] md:aspect-auto md:h-full overflow-hidden max-h-[45vh] md:max-h-none">
+          {/* Bio Image View - Mobile: Small Circle, Desktop: Full Height */}
+          <div className="relative w-full md:w-[45%] bg-black dark:bg-stone-100 flex flex-col items-center md:items-stretch pt-8 md:pt-0 shrink-0">
+            <div className="relative w-[120px] h-[120px] md:w-full md:h-full rounded-full md:rounded-none overflow-hidden border-2 border-brand-heaven-gold md:border-none shadow-glow md:shadow-none shrink-0">
               <img
                 key={imgSrc}
                 src={imgSrc}
@@ -70,11 +70,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 onError={handleImageError}
                 className={`w-full h-full object-cover transition-all duration-1000 ${isShowingPromo ? 'scale-105' : 'scale-100 brightness-90 dark:brightness-100'}`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 dark:from-white/40 via-transparent to-transparent" />
+              <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 dark:from-white/40 via-transparent to-transparent" />
             </div>
 
             {participant.promoPhotoUrl && (
-              <div className="absolute bottom-6 left-0 w-full px-6 z-20">
+              <div className="hidden md:block absolute bottom-6 left-0 w-full px-6 z-20">
                 <button
                   onClick={() => {
                     setIsShowingPromo(!isShowingPromo);
@@ -87,10 +87,25 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 </button>
               </div>
             )}
+            {/* Mobile Promo Button */}
+            {participant.promoPhotoUrl && (
+              <div className="md:hidden mt-4">
+                <button
+                  onClick={() => {
+                    setIsShowingPromo(!isShowingPromo);
+                    setFallbackStage(0);
+                  }}
+                  className="py-2 px-4 bg-brand-heaven-gold/10 border border-brand-heaven-gold/30 rounded-full text-brand-heaven-gold text-[10px] font-avenir-bold uppercase flex items-center justify-center gap-2"
+                >
+                  {isShowingPromo ? <User size={12} /> : <Sparkles size={12} />}
+                  <span>{isShowingPromo ? 'Profile' : 'Promo'}</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Bio Text Content */}
-          <div className="w-full md:w-[55%] p-8 md:p-14 lg:p-16 flex flex-col bg-[#0a0a0a] dark:bg-white overflow-y-auto max-h-[85vh] custom-scrollbar">
+          <div className="w-full md:w-[55%] p-6 md:p-14 lg:p-16 flex flex-col bg-[#0a0a0a] dark:bg-white overflow-y-auto max-h-[85vh] custom-scrollbar">
 
             <div className="mb-12 flex flex-wrap gap-8">
               <div className="flex items-center gap-4">
@@ -112,18 +127,18 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
               )}
             </div>
 
-            <div className="mb-10">
-              <h2 className="text-4xl md:text-6xl font-extrabold text-white dark:text-black leading-[1.1] mb-4 uppercase tracking-tighter">
+            <div className="mb-8 md:mb-10 text-center md:text-left">
+              <h2 className="text-2xl md:text-5xl lg:text-6xl font-extrabold text-white dark:text-black leading-[1.1] mb-3 md:mb-4 uppercase tracking-tighter">
                 {participant.name}
               </h2>
-              <div className="flex flex-wrap items-center gap-3 mb-1">
-                <p className="text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
-                <div className="w-1.5 h-1.5 rounded-full bg-brand-heaven-gold opacity-30" />
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-1">
+                <p className="text-sm md:text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
+                <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-brand-heaven-gold opacity-30" />
                 <p className="text-[12px] font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
               </div>
             </div>
 
-            <div className="w-20 h-[1.5px] bg-brand-heaven-gold mb-12" />
+            <div className="w-20 h-[1.5px] bg-brand-heaven-gold mb-8 md:mb-12 mx-auto md:mx-0" />
 
             {/* Public Narrative */}
             <div className="space-y-10 mb-16">

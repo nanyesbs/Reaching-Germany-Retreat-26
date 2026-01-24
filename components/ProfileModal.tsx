@@ -54,15 +54,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
 
         <button
           onClick={onClose}
-          className="fixed top-4 right-4 md:absolute md:top-6 md:right-6 z-[110] p-2 bg-black/40 md:bg-transparent backdrop-blur-md md:backdrop-blur-none rounded-full text-white/90 md:text-white/50 dark:text-stone-300 hover:text-brand-heaven-gold transition-all shadow-lg md:shadow-none"
+          className="fixed top-6 right-6 md:absolute md:top-8 md:right-8 z-[110] w-12 h-12 flex items-center justify-center bg-black/40 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none rounded-full text-white/90 md:text-white/40 dark:text-stone-400 dark:md:text-stone-300 hover:text-brand-heaven-gold dark:hover:text-brand-heaven-gold transition-all shadow-xl md:shadow-none active:scale-95 group"
         >
-          <X size={24} />
+          <X size={28} className="transition-transform group-hover:rotate-90" />
         </button>
 
         <div className="flex flex-col md:flex-row w-full h-full">
-          {/* Bio Image View - Mobile: Small Circle, Desktop: Full Height */}
-          <div className="relative w-full md:w-[45%] bg-black dark:bg-stone-100 flex flex-col items-center md:items-stretch pt-8 md:pt-0 shrink-0">
-            <div className="relative w-[120px] h-[120px] md:w-full md:h-full rounded-full md:rounded-none overflow-hidden border-2 border-brand-heaven-gold md:border-none shadow-glow md:shadow-none shrink-0">
+          {/* Bio Image View - Mobile: Integrated Hero, Desktop: Full Height */}
+          <div className="relative w-full md:w-[45%] bg-black dark:bg-stone-100 flex flex-col shrink-0">
+            <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden shadow-2xl md:shadow-none">
               <img
                 key={imgSrc}
                 src={imgSrc}
@@ -70,9 +70,26 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 onError={handleImageError}
                 className={`w-full h-full object-cover transition-all duration-1000 ${isShowingPromo ? 'scale-105' : 'scale-100 brightness-90 dark:brightness-100'}`}
               />
-              <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 dark:from-white/40 via-transparent to-transparent" />
+              {/* Overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent md:bg-gradient-to-t md:from-black/80 md:dark:from-white/40 md:via-transparent md:to-transparent" />
+
+              {/* Mobile Profile Photo Controls */}
+              {participant.promoPhotoUrl && (
+                <div className="md:hidden absolute bottom-6 right-6 z-30">
+                  <button
+                    onClick={() => {
+                      setIsShowingPromo(!isShowingPromo);
+                      setFallbackStage(0);
+                    }}
+                    className="w-12 h-12 bg-brand-heaven-gold/20 backdrop-blur-xl border border-brand-heaven-gold/40 rounded-full flex items-center justify-center text-brand-heaven-gold shadow-glow transition-all active:scale-90"
+                  >
+                    {isShowingPromo ? <User size={20} /> : <Sparkles size={20} />}
+                  </button>
+                </div>
+              )}
             </div>
 
+            {/* Desktop Promo Button */}
             {participant.promoPhotoUrl && (
               <div className="hidden md:block absolute bottom-6 left-0 w-full px-6 z-20">
                 <button
@@ -87,58 +104,44 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 </button>
               </div>
             )}
-            {/* Mobile Promo Button */}
-            {participant.promoPhotoUrl && (
-              <div className="md:hidden mt-4">
-                <button
-                  onClick={() => {
-                    setIsShowingPromo(!isShowingPromo);
-                    setFallbackStage(0);
-                  }}
-                  className="py-2 px-4 bg-brand-heaven-gold/10 border border-brand-heaven-gold/30 rounded-full text-brand-heaven-gold text-[10px] font-avenir-bold uppercase flex items-center justify-center gap-2"
-                >
-                  {isShowingPromo ? <User size={12} /> : <Sparkles size={12} />}
-                  <span>{isShowingPromo ? 'Profile' : 'Promo'}</span>
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Bio Text Content */}
-          <div className="w-full md:w-[55%] p-6 md:p-14 lg:p-16 flex flex-col bg-[#0a0a0a] dark:bg-white overflow-y-auto max-h-[85vh] custom-scrollbar">
+          <div className="w-full md:w-[55%] p-5 sm:p-8 md:p-14 lg:p-16 flex flex-col bg-[#0a0a0a] dark:bg-white overflow-y-auto max-h-[85vh] md:max-h-none custom-scrollbar pb-24 md:pb-16">
 
-            <div className="mb-12 flex flex-wrap gap-8">
-              <div className="flex items-center gap-4">
-                <span className="text-3xl filter drop-shadow-md">{participant.country.flag}</span>
+            {/* Flags / Nodes - Compact on mobile */}
+            <div className="mb-10 md:mb-12 flex flex-wrap gap-4 sm:gap-8">
+              <div className="flex items-center gap-3 md:gap-4">
+                <span className="text-2xl md:text-3xl filter drop-shadow-md">{participant.country.flag}</span>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Resident Node</span>
-                  <span className="text-[12px] font-avenir-medium text-white dark:text-black uppercase">{participant.country.name}</span>
+                  <span className="text-[8px] md:text-[9px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Resident Node</span>
+                  <span className="text-[10px] md:text-[12px] font-avenir-medium text-white dark:text-black uppercase">{participant.country.name}</span>
                 </div>
               </div>
 
               {participant.country.code !== participant.nationality.code && (
-                <div className="flex items-center gap-4 border-l border-white/10 dark:border-stone-200 pl-8">
-                  <span className="text-3xl filter drop-shadow-md">{participant.nationality.flag}</span>
+                <div className="flex items-center gap-3 md:gap-4 border-l border-white/10 dark:border-stone-200 pl-4 sm:pl-8">
+                  <span className="text-2xl md:text-3xl filter drop-shadow-md">{participant.nationality.flag}</span>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Heritage</span>
-                    <span className="text-[12px] font-avenir-medium text-white dark:text-black uppercase">{participant.nationality.name}</span>
+                    <span className="text-[8px] md:text-[9px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Heritage</span>
+                    <span className="text-[10px] md:text-[12px] font-avenir-medium text-white dark:text-black uppercase">{participant.nationality.name}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="mb-8 md:mb-10 text-center md:text-left">
-              <h2 className="text-2xl md:text-5xl lg:text-6xl font-extrabold text-white dark:text-black leading-[1.1] mb-3 md:mb-4 uppercase tracking-tighter">
+            <div className="mb-8 md:mb-10">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white dark:text-black leading-[1.05] mb-4 md:mb-6 uppercase tracking-tighter">
                 {participant.name}
               </h2>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-1">
-                <p className="text-sm md:text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
-                <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-brand-heaven-gold opacity-30" />
-                <p className="text-[12px] font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                <p className="text-base sm:text-lg md:text-xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
+                <div className="hidden sm:block w-1 h-1 rounded-full bg-brand-heaven-gold opacity-30" />
+                <p className="text-[10px] md:text-[12px] font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
               </div>
             </div>
 
-            <div className="w-20 h-[1.5px] bg-brand-heaven-gold mb-8 md:mb-12 mx-auto md:mx-0" />
+            <div className="w-16 md:w-20 h-[1.5px] bg-brand-heaven-gold mb-8 md:mb-12" />
 
             {/* Public Narrative */}
             <div className="space-y-10 mb-16">
@@ -195,25 +198,25 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
 
             {/* Admin Controls Area */}
             {isAdmin && (
-              <div className="mt-16 p-8 bg-brand-heaven-gold/5 border border-brand-heaven-gold/20 rounded-button animate-fade-in">
-                <div className="flex items-center justify-between mb-8">
+              <div className="mt-16 p-6 sm:p-8 bg-brand-heaven-gold/5 border border-brand-heaven-gold/20 rounded-button animate-fade-in mb-12">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                   <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[3px] flex items-center gap-2">
                     <Shield size={14} /> Admin Secure Access
                   </h4>
                   <div className="flex gap-2">
-                    <button onClick={() => onEdit?.(participant.id)} className="px-6 py-2.5 bg-brand-heaven-gold text-white rounded-button text-[10px] font-avenir-bold uppercase transition-all hover:brightness-110 shadow-md">Edit Node</button>
-                    <button onClick={() => onDelete?.(participant.id)} className="px-6 py-2.5 bg-red-500 text-white rounded-button text-[10px] font-avenir-bold uppercase hover:brightness-110 transition-all shadow-md">Delete</button>
+                    <button onClick={() => onEdit?.(participant.id)} className="flex-1 sm:flex-none px-6 py-3 bg-brand-heaven-gold text-white rounded-button text-[10px] font-avenir-bold uppercase transition-all hover:brightness-110 shadow-md active:scale-95">Edit Node</button>
+                    <button onClick={() => onDelete?.(participant.id)} className="flex-1 sm:flex-none px-6 py-3 bg-red-500 text-white rounded-button text-[10px] font-avenir-bold uppercase hover:brightness-110 transition-all shadow-md active:scale-95">Delete</button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-10 opacity-80">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 opacity-80">
                   <div className="flex flex-col">
                     <span className="text-[8px] font-avenir-bold uppercase text-brand-heaven-gold mb-1">Secure Email</span>
-                    <a href={`mailto:${participant.email}`} className="text-[12px] font-mono text-white dark:text-black hover:underline">{participant.email || 'None'}</a>
+                    <a href={`mailto:${participant.email}`} className="text-[11px] md:text-[12px] font-mono text-white dark:text-black hover:underline break-all">{participant.email || 'None'}</a>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[8px] font-avenir-bold uppercase text-brand-heaven-gold mb-1">Direct Line</span>
-                    <a href={`tel:${participant.phone}`} className="text-[12px] font-mono text-white dark:text-black hover:underline">{participant.phone || 'None'}</a>
+                    <a href={`tel:${participant.phone}`} className="text-[11px] md:text-[12px] font-mono text-white dark:text-black hover:underline">{participant.phone || 'None'}</a>
                   </div>
                 </div>
               </div>

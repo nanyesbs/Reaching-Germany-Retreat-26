@@ -1,4 +1,4 @@
-import { COUNTRY_LIST } from './constants';
+import { COUNTRY_LIST, COUNTRY_SYNONYMS } from './constants';
 import { Participant, Country } from './types';
 
 // Heuristic to detect and fix common "Double Encoding" (UTF-8 interpreted as Latin-1)
@@ -121,16 +121,55 @@ export const normalizeString = (str: string): string => {
 };
 
 /**
+ * Converts a 2-letter ISO country code to a flag emoji.
+ */
+export const getFlagEmoji = (countryCode: string): string => {
+    if (!countryCode || countryCode.length !== 2) return '';
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+};
+
+/**
  * Finds a country by name or code, stripping emojis for comparison.
+ * Preserves the original emoji if present in the input.
  */
 export const findCountry = (nameOrCode: string): Country => {
     if (!nameOrCode) return COUNTRY_LIST[0];
-    const input = stripEmojis(nameOrCode.toString()).trim().toLowerCase();
-    const found = COUNTRY_LIST.find(c =>
+
+    const originalText = nameOrCode.toString().trim();
+    const emojiMatch = originalText.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u);
+    const originalEmoji = emojiMatch ? emojiMatch[0] : null;
+
+    const input = stripEmojis(originalText).toLowerCase();
+
+    // 1. Direct match or synonym
+    const mappedCode = COUNTRY_SYNONYMS[input];
+    const match = COUNTRY_LIST.find(c =>
         c.name.toLowerCase() === input ||
-        c.code.toLowerCase() === input
+        c.code.toLowerCase() === input ||
+        (mappedCode && c.code === mappedCode)
     );
-    return found || COUNTRY_LIST[0];
+
+    if (match) {
+        return {
+            ...match,
+            flag: originalEmoji || match.flag
+        };
+    }
+
+    // 2. Fallback: Try to use the original emoji if it looks like a flag
+    if (originalEmoji) {
+        return {
+            name: input.charAt(0).toUpperCase() + input.slice(1),
+            flag: originalEmoji,
+            code: '??'
+        };
+    }
+
+    return COUNTRY_LIST[0];
 };
 
 /**

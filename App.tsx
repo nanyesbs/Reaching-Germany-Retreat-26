@@ -142,6 +142,15 @@ const App: React.FC = () => {
     if (selectedParticipant?.id === id) setSelectedParticipant(null);
   };
 
+  const availableLetters = useMemo(() => {
+    const letters = new Set(participants.map(p => (p.searchName || '').charAt(0).toUpperCase()));
+    return letters;
+  }, [participants]);
+
+  const sortedAlphabet = useMemo(() => {
+    return ALPHABET_GROUPS.LATIN.filter(char => availableLetters.has(char));
+  }, [availableLetters]);
+
   return (
     <div className="min-h-screen transition-colors duration-500 bg-black dark:bg-white pt-16">
       <Navbar
@@ -189,16 +198,25 @@ const App: React.FC = () => {
                   </button>
                   <div className="w-[1px] h-4 bg-white/10 dark:bg-black/10 mx-2" />
 
-                  {/* English A-Z (Normalized Filter) */}
-                  {ALPHABET_GROUPS.LATIN.map(char => (
-                    <button
-                      key={char}
-                      onClick={() => setFilterLetter(char)}
-                      className={`w-9 h-9 flex-shrink-0 flex items-center justify-center text-[11px] font-avenir-bold transition-all ${filterLetter === char ? 'bg-white dark:bg-black text-black dark:text-white' : 'text-white/40 dark:text-black/40 hover:bg-white/5 dark:hover:bg-black/5 hover:text-white dark:hover:text-black'}`}
-                    >
-                      {char}
-                    </button>
-                  ))}
+                  {/* English A-Z (Normalized Filter) - Automatic detection */}
+                  {ALPHABET_GROUPS.LATIN.map(char => {
+                    const isAvailable = availableLetters.has(char);
+                    return (
+                      <button
+                        key={char}
+                        onClick={() => setFilterLetter(char)}
+                        disabled={!isAvailable}
+                        className={`w-9 h-9 flex-shrink-0 flex items-center justify-center text-[11px] font-avenir-bold transition-all ${filterLetter === char
+                            ? 'bg-white dark:bg-black text-black dark:text-white'
+                            : isAvailable
+                              ? 'text-white/80 dark:text-black/80 hover:bg-white/10 dark:hover:bg-black/10 hover:text-white dark:hover:text-black'
+                              : 'text-white/10 dark:text-black/10 cursor-not-allowed'
+                          }`}
+                      >
+                        {char}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

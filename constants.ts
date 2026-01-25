@@ -83,8 +83,24 @@ export const COUNTRY_LIST: Country[] = [
   { name: 'Finland', flag: '🇫🇮', code: 'FI' },
   { name: 'Ukraine', flag: '🇺🇦', code: 'UA' },
   { name: 'Netherlands', flag: '🇳🇱', code: 'NL' },
+  { name: 'Sweden', flag: '🇸🇪', code: 'SE' },
+  { name: 'Austria', flag: '🇦🇹', code: 'AT' },
+  { name: 'Belgium', flag: '🇧🇪', code: 'BE' },
+  { name: 'Greece', flag: '🇬🇷', code: 'GR' },
+  { name: 'Poland', flag: '🇵🇱', code: 'PL' },
+  { name: 'Romania', flag: '🇷🇴', code: 'RO' },
   { name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', code: 'SCT' }
 ];
+
+export const COUNTRY_SYNONYMS: Record<string, string> = {
+  'great britain': 'GB',
+  'uk': 'GB',
+  'usa': 'US',
+  'united states of america': 'US',
+  'uae': 'AE',
+  'holland': 'NL',
+  'brasil': 'BR'
+};
 
 export const INITIAL_PARTICIPANTS: Participant[] = [
   {

@@ -50,7 +50,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/90 dark:bg-white/95 backdrop-blur-2xl animate-fade-in overflow-y-auto"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-5xl max-h-[95vh] md:max-h-[90vh] bg-black dark:bg-white border border-white/10 dark:border-stone-200 overflow-hidden flex flex-col rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-colors duration-500">
+      <div className="relative w-full max-w-5xl md:max-h-[90vh] bg-black dark:bg-white border border-white/10 dark:border-stone-200 md:overflow-hidden flex flex-col rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-colors duration-500">
 
         <button
           onClick={onClose}
@@ -59,12 +59,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
           <X size={20} className="transition-transform group-hover:rotate-90" />
         </button>
 
-        <div className="flex flex-col md:flex-row w-full h-full overflow-y-auto md:overflow-hidden">
+        <div className="flex flex-col md:flex-row w-full md:h-full md:overflow-hidden">
           {/* Visual Column - Refined 30% */}
-          <div className="w-full md:w-[32%] bg-stone-900/50 dark:bg-stone-50/50 flex flex-col flex-shrink-0 border-b md:border-b-0 md:border-r border-white/5 dark:border-stone-100 p-6 md:p-8 md:overflow-y-auto custom-scrollbar md:h-full">
+          <div className="w-full md:w-[32%] bg-stone-900/50 dark:bg-stone-50/50 flex flex-col flex-shrink-0 border-b md:border-b-0 md:border-r border-white/5 dark:border-stone-100 p-4 md:p-8 md:overflow-y-auto custom-scrollbar md:h-full">
 
             {/* Profile Frame */}
-            <div className="relative w-full aspect-square md:aspect-[4/5] rounded-xl overflow-hidden border border-white/10 dark:border-stone-200 shadow-xl mb-6">
+            <div className="relative w-full aspect-[4/3] md:aspect-[4/5] rounded-xl overflow-hidden border border-white/10 dark:border-stone-200 shadow-xl mb-4 md:mb-6">
               <img
                 src={participant.photoUrl || getIdentityPlaceholder(participant.name)}
                 alt={participant.name}
@@ -89,7 +89,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   </a>
                 </div>
                 <div
-                  className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/5 dark:border-stone-200/50 shadow-lg bg-black/20 cursor-zoom-in"
+                  className="relative w-full aspect-[16/9] max-h-[120px] md:max-h-none md:aspect-video rounded-xl overflow-hidden border border-white/5 dark:border-stone-200/50 shadow-lg bg-black/20 cursor-zoom-in"
                   onClick={() => window.open(participant.promoPhotoUrl, '_blank')}
                 >
                   <img
@@ -105,7 +105,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
             )}
 
             {/* Verification Status */}
-            <div className="mt-auto pt-8 flex items-center justify-center gap-3 opacity-40">
+            <div className="mt-4 md:mt-auto pt-4 md:pt-8 flex items-center justify-center gap-3 opacity-40">
               <Shield size={12} className="text-brand-heaven-gold" />
               <span className="text-[8px] font-avenir-bold text-white dark:text-black uppercase tracking-[2px]">Encrypted Stuttgart Node</span>
             </div>
@@ -113,7 +113,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
 
           {/* Intelligence Column - 68% */}
           <div className="w-full md:w-[68%] flex-1 flex flex-col bg-black dark:bg-white md:overflow-hidden">
-            <div className="flex-1 md:overflow-y-auto custom-scrollbar px-6 py-10 md:px-12 md:py-12">
+            <div className="flex-1 md:overflow-y-auto custom-scrollbar px-4 py-6 md:px-12 md:py-12">
 
               {/* Header: Identity Core */}
               <div className="mb-10">

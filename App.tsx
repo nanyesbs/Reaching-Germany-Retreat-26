@@ -9,9 +9,9 @@ import RegistrationForm from './components/RegistrationForm';
 import { Participant, ViewMode, Country, LayoutMode } from './types';
 import { api } from './services/api';
 import { COUNTRY_LIST, ALPHABET_GROUPS } from './constants';
-import { sortParticipants, normalizeString, convertDriveUrl, findCountry } from './utils';
+import { sortParticipants, normalizeString, convertDriveUrl, findCountry, processParticipant } from './utils';
 import { syncService } from './services/syncService';
-import { Search, ShieldCheck, Users, Loader2, LayoutGrid, Moon, Sun, Globe, Building, Briefcase, Rows, Columns, Square } from 'lucide-react';
+import { Search, ShieldCheck, Users, Loader2, LayoutGrid, Moon, Sun, Globe, Building, Briefcase, Rows, Columns, Square, Filter, RefreshCcw, X } from 'lucide-react';
 
 const App: React.FC = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -30,6 +30,7 @@ const App: React.FC = () => {
 
   const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
   const [activeEditingId, setActiveEditingId] = useState<string | null>(null);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const [filterCountryCode, setFilterCountryCode] = useState<string>('ALL');
   const [filterMinistry, setFilterMinistry] = useState<string>('ALL');
@@ -79,17 +80,9 @@ const App: React.FC = () => {
       // 3. Reload data locally to reflect changes
       const freshData = await api.getParticipants();
 
-      const correctedData = freshData.map(p => ({
-        ...p,
-        photoUrl: (p.photoUrl?.includes('drive.google.com') || p.photoUrl?.includes('lh3.googleusercontent.com'))
-          ? convertDriveUrl(p.photoUrl)
-          : p.photoUrl,
-        promoPhotoUrl: (p.promoPhotoUrl?.includes('drive.google.com') || p.promoPhotoUrl?.includes('lh3.googleusercontent.com'))
-          ? convertDriveUrl(p.promoPhotoUrl)
-          : p.promoPhotoUrl
-      }));
+      const processedData = freshData.map(p => processParticipant(p));
 
-      setParticipants(correctedData);
+      setParticipants(sortParticipants(processedData));
       console.log('Automated sync completed successfully.');
 
       // If we used a master URL, update local storage to match
@@ -120,25 +113,15 @@ const App: React.FC = () => {
 
       // Hotfix: Ensure any existing participants with broken/session-tied Drive links or incorrect country mappings are corrected on-the-fly
       const correctedData = data.map(p => {
-        let country = p.country;
+        const processed = processParticipant(p);
 
-        // Re-find country for everyone using their stored 'country.name' or 'nationality.name'
-        // This fixes the "Latvia as Germany" issue from previous versions
-        if (p.country) {
-          const fresh = findCountry(p.country.name);
-          if (fresh.code !== '??') country = fresh;
+        // Ensure flag synchronization logic is also applied
+        if (processed.country) {
+          const fresh = findCountry(processed.country.name);
+          if (fresh.code !== '??') processed.country = fresh;
         }
 
-        return {
-          ...p,
-          country: country,
-          photoUrl: (p.photoUrl?.includes('drive.google.com') || p.photoUrl?.includes('lh3.googleusercontent.com'))
-            ? convertDriveUrl(p.photoUrl)
-            : p.photoUrl,
-          promoPhotoUrl: (p.promoPhotoUrl?.includes('drive.google.com') || p.promoPhotoUrl?.includes('lh3.googleusercontent.com'))
-            ? convertDriveUrl(p.promoPhotoUrl)
-            : p.promoPhotoUrl
-        };
+        return processed;
       });
 
       setParticipants(sortParticipants(correctedData));
@@ -184,12 +167,12 @@ const App: React.FC = () => {
 
   const handleAdd = async (p: Omit<Participant, 'id'>) => {
     const fresh = await api.addParticipant(p);
-    setParticipants(prev => sortParticipants([...prev, fresh]));
+    setParticipants(prev => sortParticipants([...prev, processParticipant(fresh)]));
   };
 
   const handleUpdate = async (id: string, updates: Partial<Participant>) => {
     const updated = await api.updateParticipant(id, updates);
-    setParticipants(prev => sortParticipants(prev.map(p => p.id === id ? updated : p)));
+    setParticipants(prev => sortParticipants(prev.map(p => p.id === id ? processParticipant(updated) : p)));
   };
 
   const handleDelete = async (id: string) => {
@@ -232,39 +215,82 @@ const App: React.FC = () => {
       <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-24 md:py-32">
         <div className="flex flex-col gap-20 mb-32">
           {viewMode === 'directory' && (
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 md:gap-10 border-b border-white/10 dark:border-black/5 pb-8 md:pb-10">
-              <div className="flex flex-col">
-                <h2 className="text-2xl font-avenir-bold text-white dark:text-black uppercase tracking-tighter">Identity Core</h2>
-                <p className="text-[10px] text-white/40 dark:text-black/40 uppercase tracking-[0.2em]">Synchronized Database Nodes</p>
+            <div className="flex flex-col gap-10">
+              {/* Refined Control Bar */}
+              <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 bg-white/5 dark:bg-black/5 p-4 rounded-3xl border border-white/10 dark:border-black/5 backdrop-blur-md">
+                <div className="relative flex-1 group">
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-heaven-gold group-focus-within:scale-110 transition-transform" />
+                  <input
+                    type="text"
+                    placeholder="Search participants, roles, or organizations..."
+                    className="w-full bg-transparent border-none p-4 pl-12 text-sm font-avenir-medium text-white dark:text-black outline-none transition-all placeholder:text-white/20 dark:placeholder:text-black/20"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 h-full px-2">
+                  <button
+                    onClick={() => performBackgroundSync()}
+                    title="Manual Refresh"
+                    className="p-3 text-brand-heaven-gold/60 hover:text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5 rounded-xl transition-all active:scale-95"
+                  >
+                    <RefreshCcw size={18} />
+                  </button>
+
+                  <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-2 hidden md:block" />
+
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setLayoutMode('list')}
+                      className={`p-3 rounded-xl transition-all ${layoutMode === 'list' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                      title="List View"
+                    >
+                      <Square size={20} />
+                    </button>
+                    <button
+                      onClick={() => setLayoutMode('grid2')}
+                      className={`p-3 rounded-xl transition-all ${layoutMode === 'grid2' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                      title="2 Column Grid"
+                    >
+                      <Columns size={20} />
+                    </button>
+                    <button
+                      onClick={() => setLayoutMode('grid4')}
+                      className={`p-3 rounded-xl transition-all ${layoutMode === 'grid4' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                      title="4 Column Grid"
+                    >
+                      <LayoutGrid size={20} />
+                    </button>
+                  </div>
+
+                  <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-2" />
+
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(true)}
+                    className={`flex items-center gap-3 px-6 py-4 rounded-xl font-avenir-bold text-[10px] uppercase tracking-[3px] transition-all active:scale-95 ${filterCountryCode !== 'ALL' || filterMinistry !== 'ALL' || filterRole !== 'ALL' || filterLetter !== 'ALL'
+                      ? 'bg-brand-heaven-gold text-white shadow-glow'
+                      : 'bg-white/5 dark:bg-black/5 text-brand-heaven-gold border border-brand-heaven-gold/20'
+                      }`}
+                  >
+                    <Filter size={14} />
+                    <span>Filtros</span>
+                    {(filterCountryCode !== 'ALL' || filterMinistry !== 'ALL' || filterRole !== 'ALL' || filterLetter !== 'ALL') && (
+                      <span className="w-2 h-2 rounded-full bg-white shadow-glow animate-pulse" />
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <div className="relative w-full xl:w-[350px]">
-                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-heaven-gold" />
-                <input
-                  type="text"
-                  placeholder="Search participants..."
-                  className="w-full bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/5 p-3 pl-11 text-[12px] font-avenir-medium text-white dark:text-black outline-none focus:border-brand-heaven-gold transition-all placeholder:text-white/20 dark:placeholder:text-black/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {viewMode === 'directory' && !loading && (
-            <div className="space-y-12">
-              {/* Alphabet Filter */}
-              <div className="sticky top-0 z-50 py-6 mb-8 mix-blend-difference xl:mix-blend-normal">
-                <div className="bg-black/80 dark:bg-white/90 backdrop-blur-xl border border-white/10 dark:border-black/5 p-2 flex items-center gap-2 overflow-x-auto custom-scrollbar shadow-2xl">
+              {/* Enhanced Alphabet Scroll */}
+              <div className="py-2 mb-4">
+                <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-2 px-1">
                   <button
                     onClick={() => setFilterLetter('ALL')}
-                    className={`h-9 px-4 flex items-center justify-center text-[10px] font-avenir-bold transition-all ${filterLetter === 'ALL' ? 'bg-brand-heaven-gold text-white' : 'text-white/40 dark:text-black/40 hover:text-white dark:hover:text-black'}`}
+                    className={`h-10 px-6 shrink-0 flex items-center justify-center text-[10px] font-avenir-bold tracking-[2px] rounded-full border transition-all ${filterLetter === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold shadow-glow' : 'text-white/40 dark:text-black/40 border-white/10 dark:border-black/5 hover:border-brand-heaven-gold/50'}`}
                   >
-                    ALL
+                    ALL NODES
                   </button>
-                  <div className="w-[1px] h-4 bg-white/10 dark:bg-black/10 mx-2" />
-
-                  {/* English A-Z (Normalized Filter) - Automatic detection */}
                   {ALPHABET_GROUPS.LATIN.map(char => {
                     const isAvailable = availableLetters.has(char);
                     return (
@@ -272,51 +298,17 @@ const App: React.FC = () => {
                         key={char}
                         onClick={() => setFilterLetter(char)}
                         disabled={!isAvailable}
-                        className={`w-9 h-9 flex-shrink-0 flex items-center justify-center text-[11px] font-avenir-bold transition-all ${filterLetter === char
-                          ? 'bg-white dark:bg-black text-black dark:text-white'
+                        className={`w-10 h-10 shrink-0 flex items-center justify-center text-[11px] font-avenir-bold rounded-full transition-all ${filterLetter === char
+                          ? 'bg-white dark:bg-black text-black dark:text-white shadow-glow-sm'
                           : isAvailable
-                            ? 'text-white/80 dark:text-black/80 hover:bg-white/10 dark:hover:bg-black/10 hover:text-white dark:hover:text-black'
-                            : 'text-white/10 dark:text-black/10 cursor-not-allowed'
+                            ? 'text-white/60 dark:text-black/60 hover:bg-white/10 dark:hover:bg-black/10 hover:text-white dark:hover:text-black border border-white/5'
+                            : 'text-white/10 dark:text-black/10 cursor-not-allowed border border-transparent'
                           }`}
                       >
                         {char}
                       </button>
                     );
                   })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 bg-white/5 dark:bg-black/5 border border-white/5 dark:border-black/5 p-5 md:p-8 rounded-card shadow-card">
-                <div className="space-y-4">
-                  <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2">
-                    <Globe size={12} /> Geographic Hub
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => setFilterCountryCode('ALL')} className={`px-3 py-1.5 text-[10px] font-avenir-medium rounded-button border ${filterCountryCode === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold' : 'border-white/10 dark:border-black/10 text-white dark:text-black opacity-50'}`}>Global</button>
-                    {activeCountries.map(c => (
-                      <button key={c.code} onClick={() => setFilterCountryCode(c.code)} className={`px-3 py-1.5 text-[10px] font-avenir-medium rounded-button border ${filterCountryCode === c.code ? 'bg-white dark:bg-black text-black dark:text-white border-white dark:border-black' : 'border-white/10 dark:border-black/10 text-white dark:text-black opacity-50'}`}>{c.code}</button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2">
-                    <Building size={12} /> Ministry
-                  </span>
-                  <select value={filterMinistry} onChange={e => setFilterMinistry(e.target.value)} className="w-full bg-black/40 dark:bg-white border border-white/10 dark:border-black/10 p-3 rounded-button text-[11px] font-avenir-medium text-white dark:text-black outline-none focus:border-brand-heaven-gold">
-                    <option value="ALL">All Organizations</option>
-                    {uniqueMinistries.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
-
-                <div className="space-y-4">
-                  <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2">
-                    <Briefcase size={12} /> Capacity
-                  </span>
-                  <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="w-full bg-black/40 dark:bg-white border border-white/10 dark:border-black/10 p-3 rounded-button text-[11px] font-avenir-medium text-white dark:text-black outline-none focus:border-brand-heaven-gold">
-                    <option value="ALL">All Leadership Roles</option>
-                    {uniqueRoles.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
                 </div>
               </div>
             </div>
@@ -363,8 +355,8 @@ const App: React.FC = () => {
 
             {/* Results Grid - Dynamic Columns */}
             <div className={`grid gap-6 md:gap-10 ${layoutMode === 'grid4' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
-                layoutMode === 'grid2' ? 'grid-cols-1 sm:grid-cols-2' :
-                  'grid-cols-1'
+              layoutMode === 'grid2' ? 'grid-cols-1 sm:grid-cols-2' :
+                'grid-cols-1'
               }`}>
               {filteredParticipants.map(p => (
                 <ParticipantCard
@@ -410,6 +402,95 @@ const App: React.FC = () => {
         onDelete={handleDelete}
         onEdit={(id) => { setSelectedParticipant(null); setActiveEditingId(id); setViewMode('admin'); }}
       />
+
+      {/* Professional Filter Drawer */}
+      <div
+        className={`fixed inset-0 z-[200] transition-all duration-500 ${isFilterDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+      >
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
+        <div className={`absolute right-0 top-0 h-full w-full max-w-sm bg-[#0a0a0a] dark:bg-white shadow-2xl border-l border-white/10 dark:border-black/5 flex flex-col transition-transform duration-500 ease-out ${isFilterDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="p-8 border-b border-white/10 dark:border-black/5 flex justify-between items-center bg-white/5 dark:bg-black/5">
+            <h3 className="text-xs font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px]">Filtros Avançados</h3>
+            <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 text-white/40 dark:text-black/40 hover:text-brand-heaven-gold transition-colors">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-10">
+            <div className="space-y-6">
+              <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2 tracking-[2px]">
+                <Globe size={14} /> Geographic Hub
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilterCountryCode('ALL')}
+                  className={`px-4 py-2 text-[10px] font-avenir-bold uppercase tracking-widest rounded-xl border transition-all ${filterCountryCode === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold shadow-glow' : 'border-white/10 dark:border-black/10 text-white/40 dark:text-black/40 hover:border-brand-heaven-gold/50'}`}
+                >
+                  Global
+                </button>
+                {activeCountries.map(c => (
+                  <button
+                    key={c.code}
+                    onClick={() => setFilterCountryCode(c.code)}
+                    className={`px-4 py-2 text-[10px] font-avenir-bold uppercase rounded-xl border transition-all ${filterCountryCode === c.code ? 'bg-white dark:bg-black text-black dark:text-white border-white dark:border-black shadow-lg' : 'border-white/10 dark:border-black/10 text-white/40 dark:text-black/40 hover:border-brand-heaven-gold/50'}`}
+                  >
+                    {c.code}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2 tracking-[2px]">
+                <Building size={14} /> Ministry / Organization
+              </span>
+              <select
+                value={filterMinistry}
+                onChange={e => setFilterMinistry(e.target.value)}
+                className="w-full bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/10 p-4 rounded-2xl text-xs font-avenir-medium text-white dark:text-black outline-none focus:border-brand-heaven-gold"
+              >
+                <option value="ALL">All Organizations</option>
+                {uniqueMinistries.map(m => <option key={m} value={m} className="bg-[#0a0a0a] dark:bg-white">{m}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-6">
+              <span className="text-[9px] font-avenir-bold text-brand-heaven-gold uppercase flex items-center gap-2 tracking-[2px]">
+                <Briefcase size={14} /> Leadership Capacity
+              </span>
+              <select
+                value={filterRole}
+                onChange={e => setFilterRole(e.target.value)}
+                className="w-full bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/10 p-4 rounded-2xl text-xs font-avenir-medium text-white dark:text-black outline-none focus:border-brand-heaven-gold"
+              >
+                <option value="ALL">All Leadership Roles</option>
+                {uniqueRoles.map(r => <option key={r} value={r} className="bg-[#0a0a0a] dark:bg-white">{r}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="p-8 border-t border-white/10 dark:border-black/5 bg-white/5 dark:bg-black/5 space-y-4">
+            <button
+              onClick={() => {
+                setFilterCountryCode('ALL');
+                setFilterMinistry('ALL');
+                setFilterRole('ALL');
+                setFilterLetter('ALL');
+                setSearchQuery('');
+              }}
+              className="w-full py-4 text-[10px] font-avenir-bold text-white/40 dark:text-black/40 uppercase tracking-[3px] hover:text-brand-heaven-gold transition-colors"
+            >
+              Limpar Todos os Filtros
+            </button>
+            <button
+              onClick={() => setIsFilterDrawerOpen(false)}
+              className="w-full py-5 bg-brand-heaven-gold text-white font-avenir-bold uppercase text-[10px] tracking-[4px] rounded-2xl shadow-glow active:scale-95 transition-all"
+            >
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

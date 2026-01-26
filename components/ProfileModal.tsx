@@ -60,89 +60,87 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
         </button>
 
         <div className="flex flex-col md:flex-row w-full h-full min-h-0">
-          {/* Bio Image View - Professional 40% Split */}
-          <div className="relative w-full md:w-[40%] bg-stone-900 dark:bg-stone-50 flex flex-col items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-white/5 dark:border-stone-100 group">
-            <div className="relative w-full aspect-square md:aspect-auto md:h-full overflow-hidden flex items-center justify-center bg-black/40">
+          {/* Bio Image View - Refined 35% Split */}
+          <div className="relative w-full md:w-[35%] bg-stone-900 dark:bg-stone-50 flex flex-col items-center justify-start shrink-0 border-b md:border-b-0 md:border-r border-white/5 dark:border-stone-100 group px-6 py-12 md:py-16">
+            <div className="relative w-full max-w-[280px] aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 dark:border-stone-200/50 group-hover:border-brand-heaven-gold/50 transition-all duration-700 bg-black/40 shadow-2xl">
               <img
                 key={imgSrc}
                 src={imgSrc}
                 alt={participant.name}
                 onError={handleImageError}
                 className={`w-full h-full transition-all duration-1000 ease-in-out ${isShowingPromo
-                  ? 'object-contain p-4 md:p-8 hover:scale-105'
-                  : 'object-cover brightness-[0.85] dark:brightness-100 hover:scale-105'
+                  ? 'object-contain p-4 md:p-6'
+                  : 'object-cover brightness-[0.9] dark:brightness-100 group-hover:scale-105'
                   }`}
               />
 
               {!isShowingPromo && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 dark:from-white/10 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
               )}
             </div>
 
+            {/* Compact Identity Info below image on desktop */}
+            {!isShowingPromo && (
+              <div className="mt-8 text-center space-y-2 hidden md:block w-full">
+                <p className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[3px] opacity-60">Identity Verified</p>
+                <div className="flex justify-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-brand-heaven-gold/40" />
+                  <div className="w-1 h-1 rounded-full bg-brand-heaven-gold/40" />
+                  <div className="w-1 h-1 rounded-full bg-brand-heaven-gold/40" />
+                </div>
+              </div>
+            )}
+
             {/* Desktop Promo Button Overlay */}
             {participant.promoPhotoUrl && (
-              <div className="absolute bottom-6 left-0 w-full px-6 z-20">
+              <div className="mt-8 w-full z-20">
                 <button
                   onClick={() => {
                     setIsShowingPromo(!isShowingPromo);
                     setFallbackStage(0);
                   }}
-                  className="w-full py-4 bg-black/60 dark:bg-white/60 backdrop-blur-2xl border border-white/10 dark:border-stone-200/50 rounded-2xl text-white dark:text-black text-[10px] md:text-xs font-avenir-bold uppercase flex items-center justify-center gap-3 transition-all hover:bg-brand-heaven-gold hover:text-white hover:border-brand-heaven-gold group tracking-widest shadow-xl"
+                  className="w-full py-4 bg-white/5 dark:bg-black/5 backdrop-blur-2xl border border-white/10 dark:border-stone-200/50 rounded-2xl text-white dark:text-black text-[9px] font-avenir-bold uppercase flex items-center justify-center gap-3 transition-all hover:bg-brand-heaven-gold hover:text-white hover:border-brand-heaven-gold group tracking-widest"
                 >
-                  {isShowingPromo ? <User size={14} /> : <Sparkles size={14} className="group-hover:animate-pulse" />}
-                  <span>{isShowingPromo ? 'View Profile' : 'View Promo Asset'}</span>
+                  {isShowingPromo ? <User size={12} /> : <Sparkles size={12} className="group-hover:animate-pulse" />}
+                  <span>{isShowingPromo ? 'View Profile' : 'View Promo'}</span>
                 </button>
-              </div>
-            )}
-
-            {isShowingPromo && (
-              <div className="absolute top-6 left-6 z-30">
-                <a
-                  href={imgSrc}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-all active:scale-90"
-                  title="Open Full Size"
-                >
-                  <Maximize2 size={16} />
-                </a>
               </div>
             )}
           </div>
 
-          {/* Bio Text Content - 60% Split with controlled scrolling */}
-          <div className="w-full md:w-[60%] flex flex-col bg-black dark:bg-white overflow-hidden min-h-0">
+          {/* Bio Text Content - 65% Split with controlled scrolling */}
+          <div className="w-full md:w-[65%] flex flex-col bg-black dark:bg-white overflow-hidden min-h-0">
             <div className="overflow-y-auto h-full custom-scrollbar px-6 py-10 sm:p-10 md:p-12 lg:p-16">
 
-              {/* Flags Section */}
-              <div className="mb-12 flex flex-wrap gap-6 items-center">
-                <div className="flex items-center gap-4 bg-white/5 dark:bg-stone-50 p-3 pr-6 rounded-2xl border border-white/5 dark:border-stone-100 shadow-sm">
-                  <span className="text-3xl filter drop-shadow-md">{participant.country.flag}</span>
+              {/* Flags Section - Tighter */}
+              <div className="mb-8 flex flex-wrap gap-4 items-center">
+                <div className="flex items-center gap-3 bg-white/5 dark:bg-stone-50 p-2 pr-4 rounded-xl border border-white/5 dark:border-stone-100 shadow-sm">
+                  <span className="text-2xl filter drop-shadow-sm">{participant.country.flag}</span>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Resident</span>
-                    <span className="text-xs font-avenir-medium text-white/90 dark:text-black/90 uppercase">{participant.country.name}</span>
+                    <span className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[1.5px]">Resident</span>
+                    <span className="text-[10px] font-avenir-medium text-white/90 dark:text-black/90 uppercase">{participant.country.name}</span>
                   </div>
                 </div>
 
                 {participant.country.code !== participant.nationality.code && (
-                  <div className="flex items-center gap-4 bg-white/5 dark:bg-stone-50 p-3 pr-6 rounded-2xl border border-white/5 dark:border-stone-100 shadow-sm">
-                    <span className="text-3xl filter drop-shadow-md">{participant.nationality.flag}</span>
+                  <div className="flex items-center gap-3 bg-white/5 dark:bg-stone-50 p-2 pr-4 rounded-xl border border-white/5 dark:border-stone-100 shadow-sm">
+                    <span className="text-2xl filter drop-shadow-sm">{participant.nationality.flag}</span>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">Heritage</span>
-                      <span className="text-xs font-avenir-medium text-white/90 dark:text-black/90 uppercase">{participant.nationality.name}</span>
+                      <span className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[1.5px]">Heritage</span>
+                      <span className="text-[10px] font-avenir-medium text-white/90 dark:text-black/90 uppercase">{participant.nationality.name}</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="mb-6 md:mb-10">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold text-white dark:text-black leading-[1.1] mb-4 md:mb-6 uppercase tracking-tighter">
+              <div className="mb-6 md:mb-8">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl font-extrabold text-white dark:text-black leading-[1.1] mb-2 md:mb-4 uppercase tracking-tighter">
                   {participant.name}
                 </h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                  <p className="text-sm md:text-2xl font-didot italic text-brand-heaven-gold">{participant.title}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <p className="text-[11px] md:text-base font-didot italic text-brand-heaven-gold">{participant.title}</p>
                   <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-brand-heaven-gold opacity-30" />
-                  <p className="text-[11px] md:text-base font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
+                  <p className="text-[9px] md:text-xs font-avenir-bold text-white/40 dark:text-stone-400 uppercase tracking-widest">{participant.organization}</p>
                 </div>
               </div>
 
@@ -150,7 +148,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
 
               <div className="space-y-6 md:space-y-10 mb-10 md:mb-16">
                 <div className="relative">
-                  <p className="text-base md:text-lg font-avenir-roman leading-relaxed text-white/90 dark:text-black/80 first-letter:text-4xl md:first-letter:text-5xl first-letter:font-didot first-letter:mr-3 md:first-letter:mr-4 first-letter:float-left first-letter:text-brand-heaven-gold">
+                  <p className="text-sm md:text-base font-avenir-roman leading-relaxed text-white/90 dark:text-black/80 first-letter:text-3xl md:first-letter:text-4xl first-letter:font-didot first-letter:mr-3 md:first-letter:mr-4 first-letter:float-left first-letter:text-brand-heaven-gold">
                     {participant.testimony || "No testimony provided."}
                   </p>
                 </div>
@@ -161,7 +159,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                       <h5 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[3px] mb-4 flex items-center gap-2">
                         <Building2 size={14} /> Organizational Vision
                       </h5>
-                      <p className="text-[15px] md:text-[17px] font-avenir-roman text-white/70 dark:text-black/70 italic leading-relaxed">
+                      <p className="text-[13px] md:text-[15px] font-avenir-roman text-white/70 dark:text-black/70 italic leading-relaxed">
                         "{participant.orgDescription}"
                       </p>
                     </div>
@@ -172,7 +170,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                       <h5 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[3px] mb-4 flex items-center gap-2">
                         <Info size={14} /> Additional Intelligence
                       </h5>
-                      <p className="text-[15px] md:text-[17px] font-avenir-roman text-white/70 dark:text-black/70 leading-relaxed">
+                      <p className="text-[13px] md:text-[15px] font-avenir-roman text-white/70 dark:text-black/70 leading-relaxed">
                         {participant.otherInfo}
                       </p>
                     </div>
@@ -185,16 +183,16 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 <div className="flex flex-col">
                   <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest mb-3">Digital Presence</span>
                   {participant.website ? (
-                    <a href={participant.website.startsWith('http') ? participant.website : `https://${participant.website}`} target="_blank" rel="noopener noreferrer" className="text-base font-avenir-medium text-white dark:text-black hover:text-brand-heaven-gold transition-colors flex items-center gap-2 group/link">
+                    <a href={participant.website.startsWith('http') ? participant.website : `https://${participant.website}`} target="_blank" rel="noopener noreferrer" className="text-sm font-avenir-medium text-white dark:text-black hover:text-brand-heaven-gold transition-colors flex items-center gap-2 group/link">
                       <Globe size={16} className="group-hover/link:animate-spin-slow" /> {participant.website.replace(/^https?:\/\//, '')}
                     </a>
                   ) : (
-                    <span className="text-base font-avenir-roman text-white/40 dark:text-stone-400 italic">No Website Linked</span>
+                    <span className="text-sm font-avenir-roman text-white/40 dark:text-stone-400 italic">No Website Linked</span>
                   )}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest mb-3">Primary Node</span>
-                  <div className="text-base font-avenir-medium text-white dark:text-black flex items-center gap-2">
+                  <div className="text-sm font-avenir-medium text-white dark:text-black flex items-center gap-2">
                     <Building2 size={16} className="text-brand-heaven-gold" /> {participant.organization}
                   </div>
                 </div>

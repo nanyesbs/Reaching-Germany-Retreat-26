@@ -475,7 +475,7 @@ const RegistrationForm: React.FC = () => {
 
                     {status === 'error' && (
                         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-button text-red-500 text-[10px] font-avenir-medium uppercase tracking-widest text-center animate-pulse">
-                            Hardware synchronization failure: {errorMessage}
+                            Synchronization failure: {errorMessage}
                         </div>
                     )}
                 </form>

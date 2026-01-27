@@ -87,7 +87,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
               <div className="flex-1 pb-2">
                 <div className="px-2 py-1 bg-brand-heaven-gold/20 backdrop-blur-md rounded-lg border border-brand-heaven-gold/30 w-fit mb-2">
                   <p className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px] flex items-center gap-1">
-                    {participant.country.flag} {participant.country.name} Node
+                    {participant.country.flag} {participant.country.name}
                   </p>
                 </div>
                 <h2 className="text-xl md:text-2xl font-extrabold text-white uppercase tracking-tighter leading-tight drop-shadow-lg">
@@ -110,7 +110,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
               <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] mb-2">{participant.country.name} Host Node</p>
+                <p className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] mb-2">{participant.country.name} Host</p>
                 <div className="w-12 h-[1px] bg-brand-heaven-gold" />
               </div>
             </div>
@@ -147,7 +147,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 <div className="w-8 h-8 rounded-full border border-brand-heaven-gold/40 flex items-center justify-center">
                   <Shield size={14} className="text-brand-heaven-gold" />
                 </div>
-                <span className="text-[9px] font-avenir-bold text-white dark:text-black uppercase tracking-[3px]">Secure Stuttgart Node</span>
+                <span className="text-[9px] font-avenir-bold text-white dark:text-black uppercase tracking-[3px]">Secure Stuttgart</span>
               </div>
               <p className="text-[8px] font-avenir-roman text-center max-w-[150px] leading-relaxed">IDENTITY VERIFIED • ACCESS GRANTED SUMMIT 2026</p>
             </div>
@@ -163,7 +163,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   <div className="flex items-center gap-3">
                     <div className="px-4 py-1.5 bg-brand-heaven-gold/5 dark:bg-stone-50 rounded-full border border-brand-heaven-gold/20 flex items-center gap-3">
                       <span className="text-xl leading-none">{participant.country.flag}</span>
-                      <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">{participant.country.name} Node</span>
+                      <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">{participant.country.name}</span>
                     </div>
                   </div>
                   {participant.nationality.code !== participant.country.code && (
@@ -257,7 +257,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   </div>
                   <div className="bg-[#0f0f0f] dark:bg-white p-5 md:p-8 flex flex-col gap-3 group transition-colors hover:bg-white/5 dark:hover:bg-stone-50">
                     <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><Info size={10} /> Other</span>
-                    <p className="text-sm font-avenir-medium text-white dark:text-black">{participant.otherInfo || 'Standard Node'}</p>
+                    <p className="text-sm font-avenir-medium text-white dark:text-black">{participant.otherInfo || 'Standard'}</p>
                   </div>
                 </div>
 
@@ -287,7 +287,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   </div>
                   <div className="flex gap-4 w-full sm:w-auto">
                     <button onClick={() => onEdit?.(participant.id)} className="flex-1 sm:flex-initial px-8 py-3 bg-brand-heaven-gold/10 hover:bg-brand-heaven-gold text-brand-heaven-gold hover:text-white border border-brand-heaven-gold/30 rounded-xl text-[10px] font-avenir-bold uppercase transition-all shadow-glow-hover">Edit Identity</button>
-                    <button onClick={() => onDelete?.(participant.id)} className="flex-1 sm:flex-initial px-8 py-3 bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white border border-red-600/30 rounded-xl text-[10px] font-avenir-bold uppercase transition-all">Deactivate Node</button>
+                    <button onClick={() => onDelete?.(participant.id)} className="flex-1 sm:flex-initial px-8 py-3 bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white border border-red-600/30 rounded-xl text-[10px] font-avenir-bold uppercase transition-all">Deactivate</button>
                   </div>
                 </div>
               )}

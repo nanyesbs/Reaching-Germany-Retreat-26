@@ -106,7 +106,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
     if (!formData.name) return alert('Name is required.');
     try {
       const processed = processParticipant(formData);
-      console.log('Attempting to sync identity node:', processed);
+      console.log('Attempting to sync identity:', processed);
 
       // Sanitize payload to remove UI-only keys that might confuse Supabase if not in schema cache
       // We only send keys that we know are valid columns or that api.updateParticipant can handle
@@ -138,14 +138,14 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
         console.log('Update Mode: Target ID', editingId);
         await onUpdate(editingId, updatePayload);
       } else {
-        console.log('Creation Mode: New Node');
+        console.log('Creation Mode: New Entry');
         await onAdd(processed as Omit<Participant, 'id'>);
       }
 
       setFormData({});
       onSetEditingId(null);
       setIsAdding(false);
-      alert('Identity Node Synchronized Successfully.');
+      alert('Identity Synchronized Successfully.');
     } catch (err: any) {
       console.error('Critical Sync Failure:', err);
       alert(`Sync failure: ${err.message || 'Check console logs for stack trace.'}`);
@@ -535,7 +535,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           <div className="w-full lg:w-[600px] bg-black dark:bg-white border border-brand-heaven-gold/40 rounded-card shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-fade-in sticky top-24">
             <div className="flex justify-between items-center p-6 border-b border-white/10 dark:border-stone-100 bg-white/5 dark:bg-stone-50">
               <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.2em]">
-                {editingId ? 'Modify Identity Node' : 'Initialize New Node'}
+                {editingId ? 'Modify Identity' : 'Initialize New Entry'}
               </h4>
               <button onClick={() => { setIsAdding(false); onSetEditingId(null); setFormData({}); }} className="hover:rotate-90 transition-all duration-300"><X size={20} className="text-white/20 dark:text-stone-400" /></button>
             </div>

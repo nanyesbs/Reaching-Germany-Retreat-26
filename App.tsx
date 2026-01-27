@@ -290,7 +290,7 @@ const App: React.FC = () => {
                     onClick={() => setFilterLetter('ALL')}
                     className={`h-10 px-6 shrink-0 flex items-center justify-center text-[10px] font-avenir-bold tracking-[2px] rounded-full border transition-all ${filterLetter === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold shadow-glow' : 'text-white/40 dark:text-black/40 border-white/10 dark:border-black/5 hover:border-brand-heaven-gold/50'}`}
                   >
-                    ALL NODES
+                    ALL PARTICIPANTS
                   </button>
                   {ALPHABET_GROUPS.LATIN.map(char => {
                     const isAvailable = availableLetters.has(char);

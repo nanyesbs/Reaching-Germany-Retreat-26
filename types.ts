@@ -11,7 +11,7 @@ export interface Participant {
   title: string;
   organization: string;
   orgDescription?: string;
-  country: Country; // Residency/Current Node
+  country: Country; // Residency/Current Region
   nationality: Country; // Origin/Heritage
   shortBio?: string;
   testimony: string;

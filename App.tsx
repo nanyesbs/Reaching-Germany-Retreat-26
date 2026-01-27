@@ -356,7 +356,7 @@ const App: React.FC = () => {
       <footer className="mt-40 border-t border-white/5 dark:border-black/5 py-32 bg-black dark:bg-white text-center">
         <div className="max-w-[1400px] mx-auto px-8 space-y-10">
           <p className="font-didot italic text-3xl text-white/30 dark:text-black/20 max-w-3xl mx-auto leading-relaxed">
-            "History is defined by the dedicated few who lead with purpose."
+            "TOGETHER FOR 100 MILLION LIVES FOR JESUS CHRIST"
           </p>
           <div className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px]">
             Leaders' Summit 2026 Stuttgart

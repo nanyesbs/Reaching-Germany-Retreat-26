@@ -143,13 +143,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
               {/* Data Blocks */}
               <div className="grid grid-cols-1 gap-10">
 
-                {/* Identity Summary: Short Bio */}
+                {/* Bio / Testimony */}
                 <div className="space-y-4">
                   <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] flex items-center gap-2">
-                    <User size={14} /> Executive Summary
+                    <Sparkles size={14} /> Bio
                   </h4>
-                  <p className="text-sm md:text-base font-avenir-roman leading-relaxed text-white/90 dark:text-black/80">
-                    {participant.shortBio || participant.testimony.substring(0, 150) + "..."}
+                  <p className="text-[13px] md:text-[15px] font-avenir-roman leading-relaxed text-white/70 dark:text-stone-600 first-letter:text-3xl first-letter:font-didot first-letter:mr-2 first-letter:float-left first-letter:text-brand-heaven-gold">
+                    {participant.testimony}
                   </p>
                 </div>
 
@@ -185,15 +185,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   </div>
                 </div>
 
-                {/* Spiritual Journey / Testimony */}
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] flex items-center gap-2">
-                    <Sparkles size={14} /> Bio
-                  </h4>
-                  <p className="text-[13px] md:text-[15px] font-avenir-roman leading-relaxed text-white/70 dark:text-stone-600 first-letter:text-3xl first-letter:font-didot first-letter:mr-2 first-letter:float-left first-letter:text-brand-heaven-gold">
-                    {participant.testimony}
-                  </p>
-                </div>
+                {/* Organization Description */}
+                {participant.orgDescription && (
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] flex items-center gap-2">
+                      <Building2 size={14} /> Organization Description
+                    </h4>
+                    <p className="text-sm md:text-base font-avenir-roman leading-relaxed text-white/90 dark:text-black/80">
+                      {participant.orgDescription}
+                    </p>
+                  </div>
+                )}
 
                 {/* Legacy & Vision */}
                 {participant.orgDescription && (

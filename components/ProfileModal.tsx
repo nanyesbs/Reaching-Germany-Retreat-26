@@ -188,7 +188,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                 {/* Spiritual Journey / Testimony */}
                 <div className="space-y-4">
                   <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px] flex items-center gap-2">
-                    <Sparkles size={14} /> Spiritual Journey
+                    <Sparkles size={14} /> Bio
                   </h4>
                   <p className="text-[13px] md:text-[15px] font-avenir-roman leading-relaxed text-white/70 dark:text-stone-600 first-letter:text-3xl first-letter:font-didot first-letter:mr-2 first-letter:float-left first-letter:text-brand-heaven-gold">
                     {participant.testimony}

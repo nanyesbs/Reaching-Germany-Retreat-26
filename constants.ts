@@ -1,7 +1,7 @@
 
 import { Participant, Country } from './types';
 
-export const ADMIN_PASSWORD = 'Reaching Germany Retreat 26@ESBSJesus!';
+export const ADMIN_PASSWORD = 'RGR@ESBSJesus!';
 export const BRAND_GOLD = '#BB9446'; // Heaven Gold
 export const BRAND_GOLD_LIGHT = '#D3B962'; // Gold
 export const BRAND_GOLD_DARK = '#9C7B3A';

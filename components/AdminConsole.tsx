@@ -590,7 +590,11 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Short Biography</label>
-                  <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[80px] resize-none" value={formData.testimony || ''} onChange={e => setFormData({ ...formData, testimony: e.target.value })} />
+                  <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[80px] resize-none" value={formData.shortBio || ''} onChange={e => setFormData({ ...formData, shortBio: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Full Testimony</label>
+                  <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[120px] resize-none" value={formData.testimony || ''} onChange={e => setFormData({ ...formData, testimony: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -603,23 +607,27 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Organization Description</label>
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Ministry / Organization Description</label>
                   <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[60px] resize-none" value={formData.orgDescription || ''} onChange={e => setFormData({ ...formData, orgDescription: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Email Address</label>
+                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Registration Email</label>
                     <input type="email" className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Phone Number</label>
-                    <div className="flex items-center gap-3">
-                      <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.phone || ''} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
-                      <label className="flex items-center gap-2 cursor-pointer shrink-0">
-                        <input type="checkbox" checked={formData.isWhatsapp || false} onChange={e => setFormData({ ...formData, isWhatsapp: e.target.checked })} className="w-4 h-4 rounded border-white/20" />
-                        <span className="text-[10px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">WhatsApp</span>
-                      </label>
-                    </div>
+                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Contact Email (for Bio)</label>
+                    <input type="email" className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.contactEmail || ''} onChange={e => setFormData({ ...formData, contactEmail: e.target.value })} />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Phone Number</label>
+                  <div className="flex items-center gap-3">
+                    <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.phone || ''} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                    <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                      <input type="checkbox" checked={formData.isWhatsapp || false} onChange={e => setFormData({ ...formData, isWhatsapp: e.target.checked })} className="w-4 h-4 rounded border-white/20" />
+                      <span className="text-[10px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">WhatsApp</span>
+                    </label>
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -627,7 +635,15 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.website || ''} onChange={e => setFormData({ ...formData, website: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Other Information</label>
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Upcoming Events</label>
+                  <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.upcomingEvents || ''} onChange={e => setFormData({ ...formData, upcomingEvents: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Dietary Restrictions</label>
+                  <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.dietaryRestrictions || ''} onChange={e => setFormData({ ...formData, dietaryRestrictions: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Other Information / Contact</label>
                   <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.otherInfo || ''} onChange={e => setFormData({ ...formData, otherInfo: e.target.value })} />
                 </div>
                 <div className="space-y-4 pt-2">

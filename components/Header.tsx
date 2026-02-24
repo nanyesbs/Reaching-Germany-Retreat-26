@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode }) => {
         <div className="w-24 h-[2px] bg-[#BB9446] mb-3" />
 
         <p className="text-sm md:text-lg font-normal text-white/90 dark:text-black/90 tracking-widest uppercase">
-          27.01.26 – 28.01.26 | Stuttgart, DE
+          24.02.26 – 26.02.26 | Stuttgart, DE
         </p>
       </div>
     </header>

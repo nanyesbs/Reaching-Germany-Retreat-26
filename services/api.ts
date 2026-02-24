@@ -1,6 +1,37 @@
 import { Participant } from '../types';
 import { supabase } from './supabase';
 
+/**
+ * Strips fields that Supabase reports as missing from the schema cache and retries.
+ * Loops until the operation succeeds or throws a non-schema error.
+ * This lets the app work gracefully while DB migrations are pending.
+ */
+const withSchemaSafeRetry = async <T>(
+  payload: Record<string, any>,
+  operation: (p: Record<string, any>) => Promise<T>
+): Promise<T> => {
+  let current = { ...payload };
+
+  // Allow up to 10 retries to strip multiple missing columns in sequence
+  for (let attempt = 0; attempt < 10; attempt++) {
+    try {
+      return await operation(current);
+    } catch (err: any) {
+      const match = err?.message?.match(/Could not find the '(.+?)' column/);
+      if (match) {
+        const missingField = match[1];
+        console.warn(`⚠️ DB column "${missingField}" not in schema — stripping and retrying. Add via SQL migration to persist.`);
+        delete current[missingField];
+      } else {
+        throw err; // non-schema error, re-throw immediately
+      }
+    }
+  }
+
+  // Last attempt after stripping all known-missing fields
+  return await operation(current);
+};
+
 export const api = {
   getParticipants: async (): Promise<Participant[]> => {
     const { data, error } = await supabase
@@ -16,25 +47,27 @@ export const api = {
   },
 
   addParticipant: async (participant: Omit<Participant, 'id'>): Promise<Participant> => {
-    const { data, error } = await supabase
-      .from('participants')
-      .insert([participant])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Participant;
+    return withSchemaSafeRetry(participant as Record<string, any>, async (p) => {
+      const { data, error } = await supabase
+        .from('participants')
+        .insert([p])
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Participant;
+    });
   },
 
   upsertParticipant: async (participant: Omit<Participant, 'id'>): Promise<Participant> => {
-    const { data, error } = await supabase
-      .from('participants')
-      .upsert(participant, { onConflict: 'email' })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Participant;
+    return withSchemaSafeRetry(participant as Record<string, any>, async (p) => {
+      const { data, error } = await supabase
+        .from('participants')
+        .upsert(p, { onConflict: 'email' })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Participant;
+    });
   },
 
   bulkUpsertParticipants: async (participants: Omit<Participant, 'id'>[]): Promise<void> => {
@@ -46,15 +79,16 @@ export const api = {
   },
 
   updateParticipant: async (id: string, updates: Partial<Participant>): Promise<Participant> => {
-    const { data, error } = await supabase
-      .from('participants')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Participant;
+    return withSchemaSafeRetry(updates as Record<string, any>, async (p) => {
+      const { data, error } = await supabase
+        .from('participants')
+        .update(p)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Participant;
+    });
   },
 
   deleteParticipant: async (id: string): Promise<void> => {

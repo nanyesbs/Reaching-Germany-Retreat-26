@@ -108,35 +108,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
       const processed = processParticipant(formData);
       console.log('Attempting to sync identity:', processed);
 
-      // Sanitize payload to remove UI-only keys that might confuse Supabase if not in schema cache
-      // We only send keys that we know are valid columns or that api.updateParticipant can handle
-      const {
-        searchName, searchOrg, // Remove generated UI fields
-        contactEmail, shortBio, upcomingEvents, dietaryRestrictions, // Remove camelCase if they are not in schema cache yet or if mapping is handled inside API
-        ...safePayload
-      } = processed;
-
-      // Add back the mapped snake_case fields if needed, OR rely on api.ts to do the mapping.
-      // Since api.updateParticipant takes Partial<Participant>, we should send the interface props.
-      // BUT, if Supabase complains about 'contactEmail' not found, it means it's trying to map it directly.
-      // So we must ensure we are NOT sending 'contactEmail' if the DB column is 'contact_email'.
-
-      // Let's manually construct the update payload to be safe
-      const updatePayload: any = {
-        ...safePayload,
-        // Map explicitly to snake_case for the direct update if strictly required,
-        // or ensure the API function handles the mapping.
-        // Currently api.updateParticipant just passes 'updates' to .update(updates).
-        // So we MUST map to snake_case here if the DB expects it.
-        contact_email: processed.contactEmail,
-        short_bio: processed.shortBio,
-        upcoming_events: processed.upcomingEvents,
-        dietary_restrictions: processed.dietaryRestrictions
-      };
-
       if (editingId) {
         console.log('Update Mode: Target ID', editingId);
-        await onUpdate(editingId, updatePayload);
+        await onUpdate(editingId, processed);
       } else {
         console.log('Creation Mode: New Entry');
         await onAdd(processed as Omit<Participant, 'id'>);

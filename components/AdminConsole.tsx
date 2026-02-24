@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Participant, Country } from '../types';
-import { ADMIN_PASSWORD, COUNTRY_LIST, getIdentityPlaceholder } from '../constants';
+import { ADMIN_PASSWORD, COUNTRY_LIST, getIdentityPlaceholder, SOCIAL_PLATFORMS } from '../constants';
 import * as XLSX from 'xlsx';
 import { api } from '../services/api';
 import { syncService } from '../services/syncService';
@@ -10,7 +10,7 @@ import {
   Image as ImageIcon, UploadCloud, Camera, History,
   RefreshCw, Loader2, FileSpreadsheet, CheckCircle2,
   Upload, Sparkles, AlertCircle, Search, Calendar,
-  Filter, ChevronDown, ChevronUp, Users
+  Filter, ChevronDown, ChevronUp, Users, Globe, Plus
 } from 'lucide-react';
 
 interface AdminConsoleProps {
@@ -490,7 +490,6 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             </h3>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <button onClick={async () => { if (confirm('WARNING: This will delete ALL participants from the Supabase database. Are you sure?')) { await api.resetData(); window.location.reload(); } }} className="text-[10px] font-avenir-bold text-red-500/50 uppercase hover:text-red-500">Factory Reset</button>
                 <button onClick={() => { setIsAdding(true); onSetEditingId(null); setFormData({}); }} className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase hover:underline">Manual Initialization +</button>
               </div>
               <div className="relative">
@@ -599,6 +598,16 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                     </select>
                   </div>
                   <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">State/Province</label>
+                    <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.state || ''} onChange={e => setFormData({ ...formData, state: e.target.value })} placeholder="Optional" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">City</label>
+                    <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.city || ''} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="Optional" />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Nationality</label>
                     <select className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-2 rounded-button text-[11px] text-white dark:text-black outline-none" value={formData.nationality?.code || ''} onChange={(e) => selectCountry('nationality', e.target.value)}>
                       {COUNTRY_LIST.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
@@ -630,7 +639,13 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Phone Number</label>
-                    <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.phone || ''} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                    <div className="flex items-center gap-3">
+                      <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.phone || ''} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                      <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                        <input type="checkbox" checked={formData.isWhatsapp || false} onChange={e => setFormData({ ...formData, isWhatsapp: e.target.checked })} className="w-4 h-4 rounded border-white/20" />
+                        <span className="text-[10px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">WhatsApp</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -640,6 +655,56 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Other Information</label>
                   <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.otherInfo || ''} onChange={e => setFormData({ ...formData, otherInfo: e.target.value })} />
+                </div>
+                <div className="space-y-4 pt-2">
+                  <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest flex items-center gap-2">
+                    <Globe size={12} /> Social Media Links
+                  </label>
+                  <div className="space-y-3">
+                    {(formData.socialMedia || []).map((acc, idx) => {
+                      const platform = SOCIAL_PLATFORMS.find(p => p.id === acc.platform);
+                      return (
+                        <div key={idx} className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200">
+                          <div className="flex items-center gap-3">
+                            <select
+                              value={acc.platform}
+                              onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: (prev.socialMedia || []).map((a, i) => i === idx ? { ...a, platform: e.target.value, handle: '' } : a) }))}
+                              className="bg-transparent border-b border-black/20 dark:border-white/20 py-2 text-[11px] outline-none flex-1 text-white dark:text-black"
+                            >
+                              {SOCIAL_PLATFORMS.map(p => <option key={p.id} value={p.id} className="text-black dark:text-black">{p.label}</option>)}
+                            </select>
+                            <div className="flex rounded-button border border-white/20 dark:border-black/20 overflow-hidden text-[8px] font-avenir-bold shrink-0">
+                              <button type="button" onClick={() => setFormData(prev => ({ ...prev, socialMedia: (prev.socialMedia || []).map((a, i) => i === idx ? { ...a, type: 'personal' } : a) }))}
+                                className={`px-2 py-1 uppercase tracking-wider transition-colors ${acc.type === 'personal' ? 'bg-brand-heaven-gold/20 text-brand-heaven-gold' : 'text-white/40 dark:text-black/40 hover:text-white dark:hover:text-black'}`}>
+                                Personal
+                              </button>
+                              <button type="button" onClick={() => setFormData(prev => ({ ...prev, socialMedia: (prev.socialMedia || []).map((a, i) => i === idx ? { ...a, type: 'ministerial' } : a) }))}
+                                className={`px-2 py-1 uppercase tracking-wider transition-colors ${acc.type === 'ministerial' ? 'bg-brand-heaven-gold/20 text-brand-heaven-gold' : 'text-white/40 dark:text-black/40 hover:text-white dark:hover:text-black'}`}>
+                                Ministry
+                              </button>
+                            </div>
+                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, socialMedia: (prev.socialMedia || []).filter((_, i) => i !== idx) }))}
+                              className="p-1.5 rounded-full hover:bg-red-500/20 text-white/40 hover:text-red-400 dark:text-black/40 dark:hover:text-red-500 transition-colors shrink-0">
+                              <X size={12} />
+                            </button>
+                          </div>
+                          <input
+                            value={acc.handle}
+                            onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: (prev.socialMedia || []).map((a, i) => i === idx ? { ...a, handle: e.target.value } : a) }))}
+                            placeholder={platform?.placeholder || '@handle'}
+                            className="bg-transparent border-b border-white/10 dark:border-black/10 py-1 text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold transition-all"
+                          />
+                        </div>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, socialMedia: [...(prev.socialMedia || []), { platform: 'instagram', handle: '', type: 'personal' }] }))}
+                      className="flex items-center gap-2 text-[9px] text-white/40 hover:text-brand-heaven-gold dark:text-black/40 dark:hover:text-brand-heaven-gold uppercase tracking-widest font-avenir-bold transition-colors py-2 px-1"
+                    >
+                      <Plus size={12} /> Add Social Link
+                    </button>
+                  </div>
                 </div>
               </div>
 

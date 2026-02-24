@@ -7,6 +7,7 @@ import ParticipantCard from './components/ParticipantCard';
 import ProfileModal from './components/ProfileModal';
 import AdminConsole from './components/AdminConsole';
 import RegistrationForm from './components/RegistrationForm';
+import MapView from './components/MapView';
 import { Participant, ViewMode, Country, LayoutMode } from './types';
 import { api } from './services/api';
 import { COUNTRY_LIST, ALPHABET_GROUPS } from './constants';
@@ -349,8 +350,20 @@ const App: React.FC = () => {
             editingId={activeEditingId}
             onSetEditingId={setActiveEditingId}
           />
+        ) : viewMode === 'map' ? (
+          <MapView
+            participants={participants}
+            onSelectCity={(city) => {
+              setFilterCountryCode('ALL');
+              setFilterMinistry('ALL');
+              setFilterRole('ALL');
+              setFilterLetter('ALL');
+              setSearchQuery(city);
+              setViewMode('directory');
+            }}
+          />
         ) : (
-          <RegistrationForm />
+          <RegistrationForm onComplete={() => setViewMode('map')} />
         )}
       </main>
 
@@ -360,7 +373,7 @@ const App: React.FC = () => {
             "TOGETHER FOR 100 MILLION LIVES FOR JESUS CHRIST"
           </p>
           <div className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[4px]">
-            Leaders' Summit 2026 Stuttgart
+            Reaching Germany Retreat 26
           </div>
         </div>
       </footer>

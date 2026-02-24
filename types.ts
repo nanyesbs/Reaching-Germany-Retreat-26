@@ -5,6 +5,12 @@ export interface Country {
   code: string;
 }
 
+export interface SocialAccount {
+  platform: string;
+  handle: string;
+  type: 'personal' | 'ministerial';
+}
+
 export interface Participant {
   id: string;
   name: string;
@@ -12,12 +18,16 @@ export interface Participant {
   organization: string;
   orgDescription?: string;
   country: Country; // Residency/Current Region
+  state?: string;
+  city?: string;
   nationality: Country; // Origin/Heritage
   shortBio?: string;
   testimony: string;
   phone: string;
+  isWhatsapp?: boolean;
   email: string;
   website: string;
+  socialMedia?: SocialAccount[];
   photoUrl: string;
   promoPhotoUrl?: string;
   otherInfo?: string;

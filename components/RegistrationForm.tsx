@@ -1,12 +1,19 @@
 
-import React, { useState } from 'react';
-import { supabase } from '../services/supabase';
+import React, { useState, useMemo } from 'react';
 import { api } from '../services/api';
-import { COUNTRY_LIST } from '../constants';
+import { COUNTRY_LIST, ROLE_OPTIONS, SOCIAL_PLATFORMS, COUNTRY_CALLING_CODES } from '../constants';
+import { Country, State, City } from 'country-state-city';
 import { findCountry, processParticipant } from '../utils';
-import { ChevronRight, ChevronLeft, Save, Send, Camera, Sparkles, User, Mail, Globe, Phone, Building2, Info, Loader2, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Save, Send, Camera, Sparkles, User, Mail, Globe, Phone, Building2, Info, Loader2, CheckCircle2, Plus, X, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { SocialAccount } from '../types';
 
-const RegistrationForm: React.FC = () => {
+interface RegistrationFormProps {
+    onComplete?: () => void;
+}
+
+const RegistrationForm: React.FC<RegistrationFormProps> = ({ onComplete }) => {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<'idle' | 'saving' | 'submitting' | 'success' | 'error'>('idle');
@@ -17,24 +24,32 @@ const RegistrationForm: React.FC = () => {
         email: '',
         fullName: '',
         residentCountry: '',
+        state: '',
+        city: '',
         nationality: '',
         shortBio: '',
         // Step 2: Ministry
         profilePicture: null as File | null,
         ministryName: '',
-        roles: '',
         ministryDescription: '',
         promoPicture: null as File | null,
         // Step 3: Contact & Extras
+        phoneCountryCode: 'DE',
         phone: '',
+        isWhatsapp: false,
         contactEmail: '',
-        website: '',
         otherContact: '',
         // Step 4: Testimony & Dietary
         testimony: '',
         upcomingEvents: '',
         dietaryRestrictions: '',
     });
+
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
+    const [openCategories, setOpenCategories] = useState<string[]>([]);
+    const [dddSearch, setDddSearch] = useState('');
+    const [showDddDropdown, setShowDddDropdown] = useState(false);
 
     const [previewUrls, setPreviewUrls] = useState({
         profile: '',
@@ -60,6 +75,11 @@ const RegistrationForm: React.FC = () => {
         }
     };
 
+    const availableStates = formData.residentCountry ? State.getStatesOfCountry(formData.residentCountry) : [];
+    const availableCities = formData.state ? City.getCitiesOfState(formData.residentCountry, formData.state) : [];
+    // Memoize the full country list to avoid 1-2s INP block on every render
+    const allCountries = useMemo(() => Country.getAllCountries(), []);
+
     const handleNext = () => setStep(prev => Math.min(prev + 1, 4));
     const handleBack = () => setStep(prev => Math.max(prev - 1, 1));
 
@@ -78,15 +98,19 @@ const RegistrationForm: React.FC = () => {
         const rawParticipant = {
             name: formData.fullName,
             email: formData.email,
-            title: formData.roles,
+            title: selectedRoles.join(', '),
             organization: formData.ministryName,
             orgDescription: formData.ministryDescription,
             country: findCountry(formData.residentCountry),
+            state: availableStates.find(s => s.isoCode === formData.state)?.name || formData.state,
+            city: formData.city,
             nationality: findCountry(formData.nationality),
             shortBio: formData.shortBio,
             testimony: formData.testimony,
-            phone: formData.phone,
-            website: formData.website,
+            phone: formData.phone ? `${COUNTRY_CALLING_CODES[formData.phoneCountryCode] || ''}${formData.phone.replace(/^0+/, '')}` : '',
+            isWhatsapp: formData.isWhatsapp,
+            website: socialAccounts.find(s => s.platform === 'website')?.handle || '',
+            socialMedia: socialAccounts,
             photoUrl: photoUrl,
             promoPhotoUrl: promoPhotoUrl,
             otherInfo: formData.otherContact,
@@ -105,18 +129,18 @@ const RegistrationForm: React.FC = () => {
 
         try {
             const processedData = await prepareParticipantData();
-            await api.saveLeader(processedData);
+            await api.upsertParticipant(processedData);
 
             if (isSubmit) {
                 setStatus('success');
             } else {
                 setStatus('idle');
-                alert('Draft saved successfully!');
+                alert(t('utils.uploadSuccess'));
             }
         } catch (err: any) {
             console.error(err);
             setStatus('error');
-            setErrorMessage(err.message || 'Error synchronization payload');
+            setErrorMessage(err.message || t('utils.errorGeneric'));
         } finally {
             setLoading(false);
         }
@@ -126,16 +150,26 @@ const RegistrationForm: React.FC = () => {
         return (
             <div className="flex flex-col items-center justify-center py-32 animate-fade-in text-center px-4">
                 <div className="w-24 h-24 bg-brand-heaven-gold/20 rounded-full flex items-center justify-center mb-8 border border-brand-heaven-gold/40 shadow-glow">
-                    <CheckCircle2 size={48} className="text-brand-heaven-gold" />
+                    <CheckCircle2 size={48} className="text-stone-900" />
                 </div>
-                <h2 className="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-tighter mb-4 italic">Registration Complete</h2>
-                <p className="text-white/60 font-avenir-roman max-w-md mx-auto mb-12">Your identity has been synchronized with the Leaders' Summit 2026 database. You are now part of the global network.</p>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="px-10 py-4 min-h-[44px] bg-brand-heaven-gold text-white rounded-button font-avenir-bold uppercase text-sm md:text-base tracking-widest hover:scale-105 transition-all shadow-glow"
-                >
-                    Return to Directory
-                </button>
+                <h2 className="text-3xl md:text-5xl font-extrabold text-black dark:text-white uppercase tracking-tighter mb-4 italic">{t('registration.completeTitle')}</h2>
+                <p className="text-stone-700 dark:text-white/60 font-avenir-roman max-w-md mx-auto mb-12">{t('registration.completeDesc')}</p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-10 py-4 min-h-[44px] border border-brand-heaven-gold/20 text-black dark:text-white rounded-button font-avenir-bold uppercase text-sm tracking-widest hover:bg-brand-heaven-gold/10 transition-all"
+                    >
+                        {t('registration.returnDir')}
+                    </button>
+                    {onComplete && (
+                        <button
+                            onClick={onComplete}
+                            className="px-10 py-4 min-h-[44px] bg-brand-heaven-gold text-black rounded-button font-avenir-bold uppercase text-sm tracking-widest hover:scale-105 transition-all shadow-glow flex items-center gap-2 justify-center"
+                        >
+                            <Globe size={18} /> {t('nav.map', 'Map')}
+                        </button>
+                    )}
+                </div>
             </div>
         );
     }
@@ -144,21 +178,29 @@ const RegistrationForm: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto animate-fade-in">
             {/* Header Section */}
             <div className="mb-16 text-center">
-                <h2 className="text-xs font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.4em] mb-4">Internal Protocol</h2>
-                <h1 className="text-3xl md:text-6xl font-extrabold text-white uppercase tracking-tighter leading-none italic mb-6">Leaders' Summit '26 Registration</h1>
-                <div className="flex items-center justify-center gap-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-500 ${step >= i ? 'border-brand-heaven-gold bg-brand-heaven-gold text-white shadow-glow-sm' : 'border-white/10 text-white/20'}`}>
-                                <span className="text-xs font-avenir-bold">{i}</span>
+                <h2 className="text-xs font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-[0.4em] mb-4">{t('registration.protocol')}</h2>
+                <h1 className="text-3xl md:text-6xl font-extrabold text-black dark:text-white uppercase tracking-tighter leading-none italic mb-6">{t('registration.title')}</h1>
+                <div className="max-w-3xl mx-auto mt-8 relative">
+                    <div className="flex items-center justify-between mb-12 px-2 md:px-6 relative z-10">
+                        {[1, 2, 3, 4].map(num => (
+                            <div key={num} className="flex flex-col items-center gap-3 relative z-10 group">
+                                <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center text-[10px] md:text-[12px] font-avenir-bold transition-all duration-500 ease-out focus-outline border-2 ${step === num ? 'bg-white dark:bg-[#050505] border-brand-heaven-gold text-stone-900 dark:text-white scale-110' :
+                                    step > num ? 'bg-white dark:bg-[#050505] border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:shadow-neu-pressed' :
+                                        'bg-white dark:bg-[#050505] border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-600'
+                                    }`}>
+                                    {step > num ? <CheckCircle2 size={16} className="text-stone-500" /> : `0${num}`}
+                                </div>
+                                <span className={`text-[8px] md:text-[10px] uppercase tracking-[3px] font-avenir-bold transition-all duration-300 absolute -bottom-6 w-max text-center ${step === num ? 'text-stone-900 dark:text-white translate-y-0 opacity-100' : 'text-stone-400 dark:text-stone-600 translate-y-1 opacity-0 group-hover:opacity-100'}`}>
+                                    {num === 1 ? t('registration.welcome.title').split('\\n')[0] : num === 2 ? t('registration.step2.label').split(' ')[1] : num === 3 ? t('registration.step3.label').split(' ')[1] : t('registration.step4.label').split(' ')[1]}
+                                </span>
                             </div>
-                            {i < 4 && <div className={`w-6 md:w-12 h-[1px] ${step > i ? 'bg-brand-heaven-gold' : 'bg-white/10'}`} />}
-                        </div>
-                    ))}
+                        ))}
+                        <div className="absolute top-1/2 md:top-7 left-10 md:left-14 right-10 md:right-14 h-[2px] bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 -z-10 rounded-full" />
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-card p-6 md:p-12 shadow-2xl relative overflow-hidden">
+            <div className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 rounded-2xl sm:rounded-3xl md:rounded-[3rem] p-5 sm:p-8 md:p-12 mb-10 overflow-visible relative transition-all duration-500">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-heaven-gold/5 blur-[100px] pointer-events-none" />
 
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-10 relative">
@@ -167,72 +209,129 @@ const RegistrationForm: React.FC = () => {
                     {step === 1 && (
                         <div className="animate-slide-up space-y-8">
                             <div className="border-l-2 border-brand-heaven-gold pl-6 space-y-4">
-                                <h2 className="text-xs md:text-sm font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.3em] md:tracking-[0.4em] mb-2">Seção 1 de 4</h2>
-                                <h3 className="text-xl md:text-2xl font-avenir-bold text-white uppercase tracking-wider mb-2">
-                                    ESBS Leaders' Summit '26 - Attending Leaders
+                                <h2 className="text-xs md:text-sm font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-[0.3em] md:tracking-[0.4em] mb-2">{t('registration.step1.label')}</h2>
+                                <h3 className="text-xl md:text-2xl font-avenir-bold text-black dark:text-white uppercase tracking-wider mb-2">
+                                    <span className="text-stone-900 dark:text-stone-400 mr-3">{t('registration.step1.label')}</span><br className="md:hidden" />
+                                    {t('registration.step1.title')}
                                 </h3>
-                                <div className="text-xs md:text-sm text-white/60 font-avenir-roman space-y-4 leading-relaxed max-w-2xl">
-                                    <p>Dear ESBS Leaders' Summit Attendees,</p>
-                                    <p>We are creating a brochure featuring all of the attending leaders to help the networking and collaboration between our attendees. Each leader will have their short bio and promotional materials for their ministries/events. We also kindly ask you to share a key testimony with us, as we would love to select a few leaders to share at the Leaders' Summit.</p>
-                                    <p>See you soon!</p>
+                                <div className="text-xs md:text-sm text-stone-700 dark:text-white/60 font-avenir-roman space-y-4 leading-relaxed max-w-2xl">
+                                    <p>{t('registration.step1.p1')}</p>
+                                    <p>{t('registration.step1.p2')}</p>
+                                    <p>{t('registration.step1.p3')}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-2">
-                                    <label className="text-xs md:text-sm font-avenir-bold text-brand-heaven-gold uppercase tracking-wide md:tracking-widest pl-1 flex items-center gap-2">
-                                        <Mail size={12} /> E-mail *
+                                    <label className="text-xs md:text-sm font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-wide md:tracking-widest pl-2 flex items-center gap-2">
+                                        <Mail size={12} /> {t('registration.step1.email')}
                                     </label>
                                     <input
                                         type="email" name="email" value={formData.email} onChange={handleChange} required
-                                        placeholder="your@email.com"
-                                        className="w-full bg-white/5 border border-white/10 p-4 min-h-[44px] rounded-button text-sm md:text-base text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                        placeholder={t('registration.step1.emailPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Full Name *</label>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step1.fullName')}</label>
                                     <input
                                         type="text" name="fullName" value={formData.fullName} onChange={handleChange} required
-                                        placeholder="Full Name"
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                        placeholder={t('registration.step1.fullNamePlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
-                                    <p className="text-[10px] md:text-xs text-white/30 uppercase tracking-[0.05em] md:tracking-[0.1em] pl-1">NOTE: This name will appear on your badge.</p>
+                                    <p className="text-[10px] md:text-xs text-stone-500 font-avenir-bold uppercase tracking-[0.05em] md:tracking-[0.1em] pl-2 mt-2">{t('registration.step1.nameNote')}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1 flex items-center gap-2">
-                                        <Globe size={12} /> Resident Country
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2 flex items-center gap-2">
+                                        <Globe size={12} /> {t('registration.step1.country')}
                                     </label>
-                                    <select
-                                        name="residentCountry" value={formData.residentCountry} onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all appearance-none"
-                                    >
-                                        <option value="" className="bg-[#0A0A0A]">Select country (Optional)</option>
-                                        {COUNTRY_LIST.map(c => (
-                                            <option key={c.code} value={c.name} className="bg-[#0A0A0A]">{c.flag} {c.name}</option>
-                                        ))}
-                                    </select>
+                                    <div className="relative">
+                                        <select
+                                            name="residentCountry"
+                                            value={formData.residentCountry}
+                                            onChange={(e) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    residentCountry: e.target.value,
+                                                    state: '',
+                                                    city: ''
+                                                }));
+                                            }}
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all appearance-none"
+                                        >
+                                            <option value="" disabled className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{t('registration.step1.selectCountry')} (Optional)</option>
+                                            {allCountries.map(c => (
+                                                <option key={c.isoCode} value={c.isoCode} className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{c.flag} {c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Nationality *</label>
-                                    <select
-                                        name="nationality" value={formData.nationality} onChange={handleChange} required
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all appearance-none"
-                                    >
-                                        <option value="" className="bg-[#0A0A0A]">Select country</option>
-                                        {COUNTRY_LIST.map(c => (
-                                            <option key={c.code} value={c.name} className="bg-[#0A0A0A]">{c.flag} {c.name}</option>
-                                        ))}
-                                    </select>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step1.state')}</label>
+                                    <div className="relative">
+                                        <select
+                                            name="state"
+                                            value={formData.state}
+                                            onChange={(e) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    state: e.target.value,
+                                                    city: ''
+                                                }));
+                                            }}
+                                            disabled={!formData.residentCountry || availableStates.length === 0}
+                                            required={availableStates.length > 0}
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all appearance-none disabled:opacity-50"
+                                        >
+                                            <option value="" disabled className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{t('registration.step1.state')} (Optional)</option>
+                                            {availableStates.map(s => (
+                                                <option key={s.isoCode} value={s.isoCode} className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">
+                                                    {s.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step1.city')}</label>
+                                    <div className="relative">
+                                        <select
+                                            name="city" value={formData.city} onChange={handleChange} required
+                                            disabled={!formData.state || availableCities.length === 0}
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all appearance-none disabled:opacity-50"
+                                        >
+                                            <option value="" disabled className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{t('registration.step1.city')} (Optional)</option>
+                                            {availableCities.map(c => (
+                                                <option key={c.name} value={c.name} className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step1.nationality')}</label>
+                                    <div className="relative">
+                                        <select
+                                            name="nationality" value={formData.nationality} onChange={handleChange} required
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all appearance-none"
+                                        >
+                                            <option value="" disabled className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{t('registration.step1.selectCountry')}</option>
+                                            {COUNTRY_LIST.map(c => (
+                                                <option key={c.code} value={c.name} className="bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800">{c.flag} {c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Short biography *</label>
+                                <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step1.bio')}</label>
                                 <textarea
                                     name="shortBio" value={formData.shortBio} onChange={handleChange} required
                                     rows={4}
-                                    placeholder="Brief background and vision..."
-                                    className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all resize-none"
+                                    placeholder={t('registration.step1.bioPlaceholder')}
+                                    className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all resize-none min-h-[140px] leading-relaxed placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                 />
                             </div>
                         </div>
@@ -242,57 +341,126 @@ const RegistrationForm: React.FC = () => {
                     {step === 2 && (
                         <div className="animate-slide-up space-y-10">
                             <div className="border-l-2 border-brand-heaven-gold pl-6 space-y-2">
-                                <h2 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.4em] mb-2">Seção 2 de 4</h2>
-                                <h3 className="text-xl md:text-2xl font-avenir-bold text-white uppercase tracking-wider mb-2">
-                                    Ministry Information
+                                <h2 className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-[0.4em] mb-2">{t('registration.step2.label')}</h2>
+                                <h3 className="text-xl md:text-2xl font-avenir-bold text-black dark:text-white uppercase tracking-wider mb-2">
+                                    <span className="text-stone-900 dark:text-stone-400 mr-3">{t('registration.step2.label')}</span><br className="md:hidden" />
+                                    {t('registration.step2.title')}
                                 </h3>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">Please note the provided information will be made public to our attendees. If you do not consent, send an email to acsongedi@europeshallbesaved.org</p>
+                                <p className="text-[10px] text-black/40 dark:text-black/40 uppercase tracking-widest leading-relaxed">{t('registration.step2.consent')}</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                 <div className="space-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1 flex items-center gap-2">
-                                            <Building2 size={12} /> Name of Ministry/Church/Organization/Business *
+                                        <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2 flex items-center gap-2">
+                                            <Building2 size={12} /> {t('registration.step2.orgName')}
                                         </label>
                                         <input
                                             type="text" name="ministryName" value={formData.ministryName} onChange={handleChange} required
-                                            placeholder="Organization Name"
-                                            className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                            placeholder={t('registration.step2.orgPlaceholder')}
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Role(s) in the organization *</label>
-                                        <input
-                                            type="text" name="roles" value={formData.roles} onChange={handleChange} required
-                                            placeholder="e.g. CEO, Pastor, Creative"
-                                            className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
-                                        />
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step2.roles')} {t('registration.step2.maxRoles')}</label>
+                                        <p className="text-[8px] text-black/30 uppercase tracking-[0.15em] pl-2 pb-2">{t('registration.step2.roleNote')}</p>
+                                        {/* Collapsible Category groups */}
+                                        {Array.from(new Set(ROLE_OPTIONS.map(r => r.category))).map(cat => {
+                                            const isOpen = openCategories.includes(cat);
+                                            const catRoles = ROLE_OPTIONS.filter(r => r.category === cat);
+                                            const selectedInCat = catRoles.filter(r => selectedRoles.includes(r.label)).length;
+                                            return (
+                                                <div key={cat} className="border-b border-white/5 last:border-0">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setOpenCategories(p => p.includes(cat) ? p.filter(c => c !== cat) : [...p, cat])}
+                                                        className="w-full flex items-center justify-between py-3 px-2 text-left hover:bg-white/[0.02] rounded-xl transition-colors group"
+                                                    >
+                                                        <span className="flex items-center gap-2">
+                                                            <span className={`text-[10px] font-avenir-bold uppercase tracking-wider transition-colors ${isOpen ? 'text-stone-900' : 'text-stone-600 group-hover:text-black/80'}`}>
+                                                                — {cat}
+                                                            </span>
+                                                            {selectedInCat > 0 && (
+                                                                <span className="text-[8px] bg-brand-heaven-gold/20 text-stone-900 px-2 py-0.5 rounded-full font-avenir-bold">
+                                                                    {selectedInCat}/4
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                        <ChevronRight size={12} className={`text-stone-400 transition-transform ${isOpen ? 'rotate-90 text-stone-900' : ''}`} />
+                                                    </button>
+                                                    {isOpen && (
+                                                        <div className="flex flex-wrap gap-2 px-2 pb-4">
+                                                            {catRoles.map(role => {
+                                                                const isSelected = selectedRoles.includes(role.label);
+                                                                const isDisabled = !isSelected && selectedInCat >= 4;
+                                                                return (
+                                                                    <button
+                                                                        key={role.label}
+                                                                        type="button"
+                                                                        disabled={isDisabled}
+                                                                        onClick={() => {
+                                                                            if (isSelected) {
+                                                                                setSelectedRoles(p => p.filter(r => r !== role.label));
+                                                                            } else if (selectedInCat < 4) {
+                                                                                setSelectedRoles(p => [...p, role.label]);
+                                                                            }
+                                                                        }}
+                                                                        className={`px-3 py-1.5 rounded-full text-[9px] font-avenir-bold uppercase tracking-wider transition-all border ${isSelected
+                                                                            ? 'bg-brand-heaven-gold/20 border-brand-heaven-gold text-stone-900'
+                                                                            : isDisabled
+                                                                                ? 'border-white/5 text-black/10 cursor-not-allowed'
+                                                                                : 'border-white/10 text-stone-600 hover:border-brand-heaven-gold/50 hover:text-black/80'
+                                                                            }`}
+                                                                    >
+                                                                        {isSelected && <span className="mr-1">✓</span>}
+                                                                        {role.label}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        {/* Selected roles summary */}
+                                        {selectedRoles.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5 pt-3 px-2">
+                                                {selectedRoles.map(r => (
+                                                    <span key={r} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-heaven-gold/15 border border-brand-heaven-gold/30 text-[8px] text-stone-900 font-avenir-bold uppercase tracking-wider">
+                                                        {r}
+                                                        <button type="button" onClick={() => setSelectedRoles(p => p.filter(x => x !== r))} className="hover:text-black transition-colors">
+                                                            <X size={9} />
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                                <span className="text-[8px] text-black/25 pl-1 self-center">{selectedRoles.length}/5</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Description of your organization</label>
+                                        <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step2.desc')}</label>
                                         <textarea
                                             name="ministryDescription" value={formData.ministryDescription} onChange={handleChange}
                                             rows={4}
-                                            className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all resize-none"
+                                            className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all resize-none min-h-[140px] leading-relaxed placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-8">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest flex items-center gap-2">
-                                            <Camera size={14} /> Profile Picture of You *
+                                        <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest flex items-center gap-2">
+                                            <Camera size={14} /> {t('registration.step2.profilePic')}
                                         </label>
-                                        <p className="text-[8px] text-white/30 uppercase tracking-[0.1em] px-1 leading-normal">This photo will help other leaders to recognize you after the event. Please only upload a photo of yourself. This photo will appear in the Leaders' Brochure.</p>
+                                        <p className="text-[8px] text-black/30 dark:text-black/40 uppercase tracking-[0.1em] px-1 leading-normal">{t('registration.step2.profileNote')}</p>
                                         <div className="relative group">
-                                            <div className="w-full aspect-square bg-white/5 border border-dashed border-white/20 rounded-card flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-brand-heaven-gold/50">
+                                            <div className="w-full aspect-square bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden transition-all border border-white/20 dark:border-black/20 hover:border-brand-heaven-gold dark:hover:border-brand-heaven-gold">
                                                 {previewUrls.profile ? (
                                                     <img src={previewUrls.profile} className="w-full h-full object-cover" alt="Profile preview" />
                                                 ) : (
                                                     <>
-                                                        <User size={32} className="text-white/10 mb-2" />
-                                                        <span className="text-[8px] text-white/30 uppercase tracking-widest">Click to upload JPG/PNG</span>
+                                                        <User size={32} className="text-stone-500 mb-4" />
+                                                        <span className="text-[10px] text-black/40 dark:text-black/40 uppercase tracking-widest font-avenir-bold">{t('registration.step2.uploadPic')}</span>
                                                     </>
                                                 )}
                                                 <input
@@ -304,18 +472,18 @@ const RegistrationForm: React.FC = () => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest flex items-center gap-2">
-                                            <Sparkles size={14} /> Promotional Picture
+                                        <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest flex items-center gap-2">
+                                            <Sparkles size={14} /> {t('registration.step2.promoPic')}
                                         </label>
-                                        <p className="text-[8px] text-white/30 uppercase tracking-[0.1em] px-1 leading-normal">If you would like to promote an event, initiative or your ministry, you are welcome to add it to this brochure.</p>
+                                        <p className="text-[8px] text-black/30 dark:text-black/40 uppercase tracking-[0.1em] px-1 leading-normal">{t('registration.step2.promoNote')}</p>
                                         <div className="relative group">
-                                            <div className="w-full aspect-video bg-white/5 border border-dashed border-white/20 rounded-card flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-brand-heaven-gold/50">
+                                            <div className="w-full aspect-video bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden transition-all border border-white/20 dark:border-black/20 hover:border-brand-heaven-gold dark:hover:border-brand-heaven-gold">
                                                 {previewUrls.promo ? (
                                                     <img src={previewUrls.promo} className="w-full h-full object-cover" alt="Promo preview" />
                                                 ) : (
                                                     <>
-                                                        <Camera size={32} className="text-white/10 mb-2" />
-                                                        <span className="text-[8px] text-white/30 uppercase tracking-widest">Company Flyer / Logo / Promo</span>
+                                                        <Camera size={32} className="text-stone-500 mb-4" />
+                                                        <span className="text-[10px] text-black/40 dark:text-black/40 uppercase tracking-widest font-avenir-bold">{t('registration.step2.uploadPromo')}</span>
                                                     </>
                                                 )}
                                                 <input
@@ -334,48 +502,165 @@ const RegistrationForm: React.FC = () => {
                     {step === 3 && (
                         <div className="animate-slide-up space-y-8">
                             <div className="border-l-2 border-brand-heaven-gold pl-6 space-y-2">
-                                <h2 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.4em] mb-2">Seção 3 de 4</h2>
-                                <h3 className="text-xl md:text-2xl font-avenir-bold text-white uppercase tracking-wider mb-2">
-                                    How can other attendees contact you?
+                                <h2 className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-[0.4em] mb-2">{t('registration.step3.label')}</h2>
+                                <h3 className="text-xl md:text-2xl font-avenir-bold text-black dark:text-white uppercase tracking-wider mb-2">
+                                    {t('registration.step3.title')}
                                 </h3>
-                                <div className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
-                                    <p>NOTE: This information will be public for the other attendees.</p>
-                                    <p>Only provide the personal information you WANT others to receive.</p>
+                                <div className="text-[10px] text-black/40 dark:text-black/40 uppercase tracking-widest leading-relaxed">
+                                    <p>{t('registration.step3.publicNote')}</p>
+                                    <p>{t('registration.step3.privacyNote')}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Phone Number</label>
-                                    <input
-                                        type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                                        placeholder="+1 234 567 890"
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
-                                    />
+                                {/* Phone with country code */}
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2 flex items-center gap-2">
+                                        <Phone size={12} /> {t('registration.step3.phone')} <span className="text-black/30 dark:text-white/30">(E.164)</span>
+                                    </label>
+                                    <div className="flex gap-3 items-end">
+                                        {/* Searchable DDD / Country Code */}
+                                        <div className="relative w-28 sm:w-44 shrink-0">
+                                            <input
+                                                type="text"
+                                                value={dddSearch || (COUNTRY_CALLING_CODES[formData.phoneCountryCode] ? `${allCountries.find(c => c.isoCode === formData.phoneCountryCode)?.flag || ''} ${COUNTRY_CALLING_CODES[formData.phoneCountryCode]}` : '')}
+                                                onFocus={() => { setDddSearch(''); setShowDddDropdown(true); }}
+                                                onBlur={() => setTimeout(() => { setShowDddDropdown(false); setDddSearch(''); }, 150)}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setDddSearch(val);
+                                                    setShowDddDropdown(true);
+
+                                                    // Auto-detection logic: Find country by DDD
+                                                    if (val.startsWith('+')) {
+                                                        const cleanVal = val.trim();
+                                                        const foundEntry = Object.entries(COUNTRY_CALLING_CODES).find(([code, ddd]) => ddd === cleanVal);
+                                                        if (foundEntry) {
+                                                            setFormData(prev => ({ ...prev, phoneCountryCode: foundEntry[0] }));
+                                                        }
+                                                    }
+                                                }}
+                                                placeholder="🌐 +49"
+                                                className="w-full bg-transparent border-b border-white/20 py-3 text-[14px] text-black/80 dark:text-white/80 outline-none focus:border-brand-heaven-gold transition-all placeholder:text-black/30 dark:placeholder:text-white/30"
+                                            />
+                                            {showDddDropdown && (
+                                                <div className="absolute z-50 top-full left-0 mt-1 w-64 max-h-52 overflow-y-auto bg-[#111] border border-white/10 rounded-2xl shadow-2xl custom-scrollbar">
+                                                    {allCountries
+                                                        .filter(c => {
+                                                            const code = COUNTRY_CALLING_CODES[c.isoCode] || '';
+                                                            const q = dddSearch.replace('+', '').toLowerCase();
+                                                            return !q || c.name.toLowerCase().includes(q) || code.includes(q);
+                                                        })
+                                                        .map(c => (
+                                                            <button
+                                                                key={c.isoCode}
+                                                                type="button"
+                                                                onMouseDown={() => {
+                                                                    setFormData(prev => ({ ...prev, phoneCountryCode: c.isoCode }));
+                                                                    setDddSearch('');
+                                                                    setShowDddDropdown(false);
+                                                                }}
+                                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-brand-heaven-gold/10 transition-colors"
+                                                            >
+                                                                <span className="text-base">{c.flag}</span>
+                                                                <span className="text-[11px] text-black/80 dark:text-white/80 font-avenir-bold flex-1 truncate">{c.name}</span>
+                                                                <span className="text-[11px] text-stone-900 dark:text-stone-300 font-avenir-bold shrink-0">{COUNTRY_CALLING_CODES[c.isoCode] || ''}</span>
+                                                            </button>
+                                                        ))
+                                                    }
+                                                </div>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                                            placeholder="123 456 7890"
+                                            className="flex-1 bg-transparent border-b border-white/20 py-3 text-[16px] text-black dark:text-white outline-none focus:border-brand-heaven-gold transition-all placeholder:text-stone-400 dark:placeholder:text-stone-600"
+                                        />
+                                    </div>
+                                    <label className="flex items-center gap-3 pl-1 pt-3 cursor-pointer group">
+                                        <div
+                                            onClick={() => setFormData(p => ({ ...p, isWhatsapp: !p.isWhatsapp }))}
+                                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${formData.isWhatsapp ? 'bg-[#25D366] border-[#25D366]' : 'border-white/20 group-hover:border-[#25D366]/50'
+                                                }`}
+                                        >
+                                            {formData.isWhatsapp && <CheckCircle2 size={12} className="text-black dark:text-white" />}
+                                        </div>
+                                        <span className="text-[10px] font-avenir-bold uppercase tracking-widest text-stone-600 dark:text-stone-400 group-hover:text-black/80 dark:group-hover:text-white transition-colors flex items-center gap-2">
+                                            <MessageCircle size={12} className="text-[#25D366]" />
+                                            {t('registration.step3.whatsappNote')}
+                                        </span>
+                                    </label>
                                 </div>
+
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Email Address</label>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step3.contactEmail')}</label>
                                     <input
                                         type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange}
-                                        placeholder="public@email.com"
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                        placeholder={t('registration.step3.contactEmailPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
                                 </div>
+
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Website</label>
-                                    <input
-                                        type="text" name="website" value={formData.website} onChange={handleChange}
-                                        placeholder="https://..."
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Other</label>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step3.other')}</label>
                                     <input
                                         type="text" name="otherContact" value={formData.otherContact} onChange={handleChange}
-                                        placeholder="@instagram / handle"
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                        placeholder={t('registration.step3.otherPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
+                                </div>
+
+                                {/* Social Media Builder */}
+                                <div className="space-y-4 md:col-span-2">
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2 flex items-center gap-2">
+                                        <Globe size={12} /> {t('registration.step3.socialMedia')}
+                                    </label>
+                                    <div className="space-y-3">
+                                        {socialAccounts.map((acc, idx) => {
+                                            const platform = SOCIAL_PLATFORMS.find(p => p.id === acc.platform);
+                                            return (
+                                                <div key={idx} className="flex flex-col gap-2 p-4 rounded-2xl border border-white/10 bg-white/[0.02]">
+                                                    <div className="flex items-center gap-3">
+                                                        <select
+                                                            value={acc.platform}
+                                                            onChange={(e) => setSocialAccounts(prev => prev.map((a, i) => i === idx ? { ...a, platform: e.target.value, handle: '' } : a))}
+                                                            className="bg-transparent border-b border-white/20 py-2 text-[12px] text-black/70 dark:text-white/70 outline-none focus:border-brand-heaven-gold transition-all appearance-none flex-1"
+                                                        >
+                                                            {SOCIAL_PLATFORMS.map(p => <option key={p.id} value={p.id} className="bg-[#050505] dark:bg-white dark:text-black">{p.label}</option>)}
+                                                        </select>
+                                                        {/* Personal / Ministerial toggle */}
+                                                        <div className="flex rounded-full border border-white/10 overflow-hidden text-[8px] font-avenir-bold shrink-0">
+                                                            <button type="button" onClick={() => setSocialAccounts(prev => prev.map((a, i) => i === idx ? { ...a, type: 'personal' } : a))}
+                                                                className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${acc.type === 'personal' ? 'bg-brand-heaven-gold/20 text-stone-900 dark:text-white' : 'text-black/30 dark:text-stone-600 hover:text-stone-700 dark:hover:text-stone-400'}`}>
+                                                                {t('registration.step3.personal')}
+                                                            </button>
+                                                            <button type="button" onClick={() => setSocialAccounts(prev => prev.map((a, i) => i === idx ? { ...a, type: 'ministerial' } : a))}
+                                                                className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${acc.type === 'ministerial' ? 'bg-brand-heaven-gold/20 text-stone-900 dark:text-white' : 'text-black/30 dark:text-stone-600 hover:text-stone-700 dark:hover:text-stone-400'}`}>
+                                                                {t('registration.step3.ministry')}
+                                                            </button>
+                                                        </div>
+                                                        <button type="button" onClick={() => setSocialAccounts(prev => prev.filter((_, i) => i !== idx))}
+                                                            className="p-1.5 rounded-full hover:bg-red-500/20 text-black/30 hover:text-red-400 transition-colors shrink-0">
+                                                            <X size={12} />
+                                                        </button>
+                                                    </div>
+                                                    <input
+                                                        value={acc.handle}
+                                                        onChange={(e) => setSocialAccounts(prev => prev.map((a, i) => i === idx ? { ...a, handle: e.target.value } : a))}
+                                                        placeholder={platform?.placeholder || '@handle'}
+                                                        className="bg-transparent border-b border-white/10 py-2 text-[14px] text-black dark:text-white outline-none focus:border-brand-heaven-gold transition-all placeholder:text-black/15 dark:placeholder:text-white/15"
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                        <button
+                                            type="button"
+                                            onClick={() => setSocialAccounts(prev => [...prev, { platform: 'instagram', handle: '', type: 'personal' }])}
+                                            className="flex items-center gap-2 text-[9px] text-black/40 dark:text-white/40 hover:text-stone-900 dark:hover:text-white uppercase tracking-widest font-avenir-bold transition-colors py-2 px-1"
+                                        >
+                                            <Plus size={12} /> {t('registration.step3.addSocial')}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -385,41 +670,42 @@ const RegistrationForm: React.FC = () => {
                     {step === 4 && (
                         <div className="animate-slide-up space-y-8">
                             <div className="border-l-2 border-brand-heaven-gold pl-6 space-y-2">
-                                <h2 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.4em] mb-2">Seção 4 de 4</h2>
-                                <h3 className="text-xl md:text-2xl font-avenir-bold text-white uppercase tracking-wider mb-2">
-                                    Testimonies
+                                <h2 className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-[0.4em] mb-2">{t('registration.step4.label')}</h2>
+                                <h3 className="text-xl md:text-2xl font-avenir-bold text-black dark:text-white uppercase tracking-wider mb-2">
+                                    <span className="text-stone-900 dark:text-stone-400 mr-3">{t('registration.step4.label')}</span><br className="md:hidden" />
+                                    {t('registration.step4.title')}
                                 </h3>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">We would love to hear your testimony of what God has done through you and your ministry last year. We will ask a few leaders on Tuesday to share.</p>
+                                <p className="text-[10px] text-black/40 dark:text-black/40 uppercase tracking-widest leading-relaxed">{t('registration.step4.testimonyNote')}</p>
                             </div>
 
                             <div className="space-y-8">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Testimony *</label>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step4.testimony')}</label>
                                     <textarea
                                         name="testimony" value={formData.testimony} onChange={handleChange} required
                                         rows={5}
-                                        placeholder="Share your story..."
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all resize-none"
+                                        placeholder={t('registration.step4.testimonyPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all resize-none min-h-[140px] leading-relaxed placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Upcoming Kingdom Events</label>
-                                    <p className="text-[8px] text-white/30 uppercase tracking-[0.1em] mb-2 pl-1">If you have any events coming up with national or continental impact, please let us know the details!</p>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step4.events')}</label>
+                                    <p className="text-[8px] text-black/30 dark:text-black/40 uppercase tracking-[0.1em] mb-2 pl-2">{t('registration.step4.eventsNote')}</p>
                                     <textarea
                                         name="upcomingEvents" value={formData.upcomingEvents} onChange={handleChange}
                                         rows={3}
-                                        placeholder="Dates, location, vision..."
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all resize-none"
+                                        placeholder={t('registration.step4.eventsPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all resize-none min-h-[100px] leading-relaxed placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest pl-1">Please, let us know if you have dietary restrictions. *</label>
+                                    <label className="text-[10px] font-avenir-bold text-stone-900 dark:text-stone-300 uppercase tracking-widest pl-2">{t('registration.step4.diet')} *</label>
                                     <input
                                         type="text" name="dietaryRestrictions" value={formData.dietaryRestrictions} onChange={handleChange} required
-                                        placeholder="write N/A if you have none"
-                                        className="w-full bg-white/5 border border-white/10 p-4 rounded-button text-sm text-white outline-none focus:border-brand-heaven-gold transition-all"
+                                        placeholder={t('registration.step4.dietPlaceholder')}
+                                        className="w-full bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 px-0 py-3 text-[16px] text-black dark:text-white outline-none border-b border-white/20 dark:border-black/20 focus:border-brand-heaven-gold dark:focus:border-brand-heaven-gold bg-transparent transition-all placeholder:text-stone-400 dark:placeholder:text-stone-400"
                                     />
                                 </div>
                             </div>
@@ -427,24 +713,25 @@ const RegistrationForm: React.FC = () => {
                     )}
 
                     {/* ACTIONS */}
-                    <div className="pt-10 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="pt-10 mt-10 border-t-2 border-[var(--bg-surface)] flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10 w-full">
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--bg-surface)] to-transparent -mt-[2px]" />
                         <div className="flex items-center gap-4 w-full sm:w-auto">
                             {step > 1 && (
                                 <button
                                     type="button"
                                     onClick={handleBack}
-                                    className="px-6 py-4 border border-white/10 text-white/50 rounded-button font-avenir-bold uppercase text-[10px] tracking-widest hover:text-white hover:border-white/20 transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center"
+                                    className="px-6 py-4 bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 active:text-stone-600 dark:active:text-stone-400 rounded-2xl font-avenir-bold uppercase text-[10px] tracking-widest text-stone-600 dark:text-stone-400 hover:text-black dark:hover:text-white transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center"
                                 >
-                                    <ChevronLeft size={16} /> Back
+                                    <ChevronLeft size={16} /> {t('registration.actions.prev')}
                                 </button>
                             )}
                             {step < 4 && (
                                 <button
                                     type="button"
                                     onClick={handleNext}
-                                    className="px-8 py-4 bg-white text-black rounded-button font-avenir-bold uppercase text-[10px] tracking-widest hover:bg-brand-heaven-gold hover:text-white transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center shadow-lg"
+                                    className="px-8 py-4 bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 text-black dark:text-white rounded-2xl font-avenir-bold uppercase text-[10px] tracking-widest hover:text-[#D3B962] transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center"
                                 >
-                                    Next Phase <ChevronRight size={16} />
+                                    {t('registration.actions.next')} <ChevronRight size={16} />
                                 </button>
                             )}
                         </div>
@@ -454,20 +741,20 @@ const RegistrationForm: React.FC = () => {
                                 type="button"
                                 onClick={() => handleSave(false)}
                                 disabled={loading}
-                                className="px-6 py-4 bg-white/5 text-white rounded-button font-avenir-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center border border-white/10"
+                                className="px-6 py-4 bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 text-black dark:text-white rounded-2xl font-avenir-bold uppercase text-[10px] tracking-widest hover:brightness-110 transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center"
                             >
                                 {status === 'saving' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                                Save Draft
+                                {t('registration.actions.saveDraft')}
                             </button>
                             {step === 4 && (
                                 <button
                                     type="button"
                                     onClick={() => handleSave(true)}
                                     disabled={loading}
-                                    className="px-10 py-4 bg-brand-heaven-gold text-white rounded-button font-avenir-bold uppercase text-[10px] tracking-widest hover:scale-105 transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center shadow-glow font-bold"
+                                    className="px-10 py-4 bg-white dark:bg-[#050505] border border-stone-200 dark:border-stone-800 text-black dark:text-white rounded-2xl font-avenir-bold uppercase text-[10px] tracking-widest hover:text-[#D3B962] hover:scale-105 transition-all flex items-center gap-2 flex-1 sm:flex-none justify-center font-bold"
                                 >
                                     {status === 'submitting' ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                                    Synchronize Bio
+                                    {t('registration.actions.submit')}
                                 </button>
                             )}
                         </div>
@@ -475,7 +762,7 @@ const RegistrationForm: React.FC = () => {
 
                     {status === 'error' && (
                         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-button text-red-500 text-[10px] font-avenir-medium uppercase tracking-widest text-center animate-pulse">
-                            Synchronization failure: {errorMessage}
+                            Transmit Identity failed: {errorMessage}
                         </div>
                     )}
                 </form>

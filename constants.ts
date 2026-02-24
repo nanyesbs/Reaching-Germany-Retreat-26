@@ -1,7 +1,7 @@
 
 import { Participant, Country } from './types';
 
-export const ADMIN_PASSWORD = 'LS26@ESBSJesus!';
+export const ADMIN_PASSWORD = 'Reaching Germany Retreat 26@ESBSJesus!';
 export const BRAND_GOLD = '#BB9446'; // Heaven Gold
 export const BRAND_GOLD_LIGHT = '#D3B962'; // Gold
 export const BRAND_GOLD_DARK = '#9C7B3A';
@@ -298,4 +298,129 @@ export const ALPHABET_GROUPS = {
   SPANISH: ["Ñ"],
   FRENCH: ["Ç", "É", "È"], // Common starters, kept minimal for UI sanity, can be expanded.
   RUSSIAN: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".split("")
+};
+
+export interface RoleOption {
+  label: string;
+  category: string;
+}
+
+export const ROLE_OPTIONS: RoleOption[] = [
+  // Leadership Roles
+  { label: 'Senior / Lead Pastor', category: 'Leadership' },
+  { label: 'Associate Pastor', category: 'Leadership' },
+  { label: 'Ministry Leader', category: 'Leadership' },
+  { label: 'Evangelist', category: 'Leadership' },
+  { label: 'Missionary', category: 'Leadership' },
+  { label: 'Prophet / Prophetic Minister', category: 'Leadership' },
+  { label: 'Apostle / Apostolic Leader', category: 'Leadership' },
+  { label: 'Bible Teacher', category: 'Leadership' },
+  { label: 'Revivalist', category: 'Leadership' },
+  { label: 'Spiritual Mentor / Discipleship Leader', category: 'Leadership' },
+  // Evangelism & Outreach
+  { label: 'Evangelism Team Leader', category: 'Evangelism & Outreach' },
+  { label: 'Street Evangelist', category: 'Evangelism & Outreach' },
+  { label: 'Outreach Coordinator', category: 'Evangelism & Outreach' },
+  { label: 'Missions Coordinator', category: 'Evangelism & Outreach' },
+  { label: 'Prayer & Intercession Leader', category: 'Evangelism & Outreach' },
+  { label: 'Worship Evangelist', category: 'Evangelism & Outreach' },
+  { label: 'Creative Evangelist', category: 'Evangelism & Outreach' },
+  // Administration & Communication
+  { label: 'Social Media Manager', category: 'Administration' },
+  { label: 'Communications Coordinator', category: 'Administration' },
+  { label: 'Event Organizer', category: 'Administration' },
+  { label: 'Project Manager', category: 'Administration' },
+  { label: 'Administrative Assistant', category: 'Administration' },
+  { label: 'Media & Production Team', category: 'Administration' },
+  { label: 'Marketing / Promotion Leader', category: 'Administration' },
+  // Worship & Creative Arts
+  { label: 'Worship Leader', category: 'Worship & Arts' },
+  { label: 'Musician / Instrumentalist', category: 'Worship & Arts' },
+  { label: 'Vocalist', category: 'Worship & Arts' },
+  { label: 'Sound Technician', category: 'Worship & Arts' },
+  { label: 'Visual / Media Artist', category: 'Worship & Arts' },
+  { label: 'Creative Director', category: 'Worship & Arts' },
+  // Discipleship & Pastoral Care
+  { label: 'Small Group Leader', category: 'Discipleship' },
+  { label: 'Youth Leader', category: 'Discipleship' },
+  { label: 'Children\'s Ministry Leader', category: 'Discipleship' },
+  { label: 'Couples Ministry Leader', category: 'Discipleship' },
+  { label: 'Pastoral Care / Counselor', category: 'Discipleship' },
+  { label: 'Leadership Coach', category: 'Discipleship' },
+  // Support & Hospitality
+  { label: 'Volunteer Coordinator', category: 'Support & Hospitality' },
+  { label: 'Hospitality Team', category: 'Support & Hospitality' },
+  { label: 'Logistics Coordinator', category: 'Support & Hospitality' },
+  { label: 'Registration Team', category: 'Support & Hospitality' },
+  { label: 'Translator / Interpreter', category: 'Support & Hospitality' },
+  { label: 'Security or Transport Team', category: 'Support & Hospitality' },
+];
+
+export interface SocialPlatform {
+  id: string;
+  label: string;
+  icon: string; // lucide icon name or custom svg id
+  color: string;
+  urlTemplate: (handle: string) => string;
+  placeholder: string;
+}
+
+export const SOCIAL_PLATFORMS: SocialPlatform[] = [
+  { id: 'instagram', label: 'Instagram', icon: 'instagram', color: '#E1306C', urlTemplate: (h) => `https://instagram.com/${h.replace('@', '')}`, placeholder: '@yourhandle' },
+  { id: 'facebook', label: 'Facebook', icon: 'facebook', color: '#1877F2', urlTemplate: (h) => `https://facebook.com/${h.replace('@', '')}`, placeholder: '@page or /username' },
+  { id: 'tiktok', label: 'TikTok', icon: 'tiktok', color: '#010101', urlTemplate: (h) => `https://tiktok.com/@${h.replace('@', '')}`, placeholder: '@yourhandle' },
+  { id: 'youtube', label: 'YouTube', icon: 'youtube', color: '#FF0000', urlTemplate: (h) => h.startsWith('http') ? h : `https://youtube.com/@${h.replace('@', '')}`, placeholder: '@channel or URL' },
+  { id: 'linkedin', label: 'LinkedIn', icon: 'linkedin', color: '#0A66C2', urlTemplate: (h) => `https://linkedin.com/in/${h.replace('@', '')}`, placeholder: '/in/username' },
+  { id: 'twitter', label: 'X (Twitter)', icon: 'twitter', color: '#1DA1F2', urlTemplate: (h) => `https://x.com/${h.replace('@', '')}`, placeholder: '@handle' },
+  { id: 'website', label: 'Website', icon: 'globe', color: '#BB9446', urlTemplate: (h) => h.startsWith('http') ? h : `https://${h}`, placeholder: 'yourwebsite.com' },
+];
+
+export const COUNTRY_CALLING_CODES: Record<string, string> = {
+  'AF': '+93', 'AL': '+355', 'DZ': '+213', 'AD': '+376', 'AO': '+244',
+  'AG': '+1 268', 'AR': '+54', 'AM': '+374', 'AU': '+61', 'AT': '+43',
+  'AZ': '+994', 'BS': '+1 242', 'BH': '+973', 'BD': '+880', 'BB': '+1 246',
+  'BY': '+375', 'BE': '+32', 'BZ': '+501', 'BJ': '+229', 'BT': '+975',
+  'BO': '+591', 'BA': '+387', 'BW': '+267', 'BR': '+55', 'BN': '+673',
+  'BG': '+359', 'BF': '+226', 'BI': '+257', 'CV': '+238', 'KH': '+855',
+  'CM': '+237', 'CA': '+1', 'CF': '+236', 'TD': '+235', 'CL': '+56',
+  'CN': '+86', 'CO': '+57', 'KM': '+269', 'CD': '+243', 'CG': '+242', 'CR': '+506',
+  'CI': '+225', 'HR': '+385', 'CU': '+53', 'CY': '+357', 'CZ': '+420', 'DK': '+45',
+  'DJ': '+253', 'DM': '+1 767', 'DO': '+1 809', 'EC': '+593', 'EG': '+20',
+  'SV': '+503', 'GQ': '+240', 'ER': '+291', 'EE': '+372', 'SZ': '+268',
+  'ET': '+251', 'FJ': '+679', 'FI': '+358', 'FR': '+33', 'GA': '+241',
+  'GM': '+220', 'GE': '+995', 'DE': '+49', 'GH': '+233', 'GR': '+30',
+  'GD': '+1 473', 'GT': '+502', 'GN': '+224', 'GW': '+245', 'GY': '+592',
+  'HT': '+509', 'HN': '+504', 'HU': '+36', 'IS': '+354', 'IN': '+91',
+  'ID': '+62', 'IR': '+98', 'IQ': '+964', 'IE': '+353', 'IL': '+972',
+  'IT': '+39', 'JM': '+1 876', 'JP': '+81', 'JO': '+962', 'KZ': '+7',
+  'KE': '+254', 'KI': '+686', 'KP': '+850', 'KR': '+82', 'KW': '+965',
+  'KG': '+996', 'LA': '+856', 'LV': '+371', 'LB': '+961', 'LS': '+266',
+  'LR': '+231', 'LY': '+218', 'LI': '+423', 'LT': '+370', 'LU': '+352',
+  'MG': '+261', 'MW': '+265', 'MY': '+60', 'MV': '+960', 'ML': '+223',
+  'MT': '+356', 'MH': '+692', 'MR': '+222', 'MU': '+230', 'MX': '+52',
+  'FM': '+691', 'MD': '+373', 'MC': '+377', 'MN': '+976', 'ME': '+382',
+  'MA': '+212', 'MZ': '+258', 'MM': '+95', 'NA': '+264', 'NR': '+674',
+  'NP': '+977', 'NL': '+31', 'NZ': '+64', 'NI': '+505', 'NE': '+227',
+  'NG': '+234', 'MK': '+389', 'NO': '+47', 'OM': '+968', 'PK': '+92',
+  'PW': '+680', 'PS': '+970', 'PA': '+507', 'PG': '+675', 'PY': '+595',
+  'PE': '+51', 'PH': '+63', 'PL': '+48', 'PT': '+351', 'QA': '+974',
+  'RO': '+40', 'RU': '+7', 'RW': '+250', 'KN': '+1 869', 'LC': '+1 758',
+  'VC': '+1 784', 'WS': '+685', 'SM': '+378', 'ST': '+239', 'SA': '+966',
+  'SN': '+221', 'RS': '+381', 'SC': '+248', 'SL': '+232', 'SG': '+65',
+  'SK': '+421', 'SI': '+386', 'SB': '+677', 'SO': '+252', 'ZA': '+27',
+  'SS': '+211', 'ES': '+34', 'LK': '+94', 'SD': '+249', 'SR': '+597',
+  'SE': '+46', 'CH': '+41', 'SY': '+963', 'TW': '+886', 'TJ': '+992',
+  'TZ': '+255', 'TH': '+66', 'TL': '+670', 'TG': '+228', 'TO': '+676',
+  'TT': '+1 868', 'TN': '+216', 'TR': '+90', 'TM': '+993', 'TV': '+688',
+  'UG': '+256', 'UA': '+380', 'AE': '+971', 'GB': '+44', 'US': '+1',
+  'UY': '+598', 'UZ': '+998', 'VU': '+678', 'VA': '+39', 'VE': '+58',
+  'VN': '+84', 'YE': '+967', 'ZM': '+260', 'ZW': '+263', 'SCT': '+44',
+  'AS': '+1 684', 'AI': '+1 264', 'AW': '+297', 'BM': '+1 441', 'VG': '+1 284',
+  'KY': '+1 345', 'CK': '+682', 'FK': '+500', 'FO': '+298', 'GF': '+594',
+  'PF': '+689', 'GI': '+350', 'GL': '+299', 'GP': '+590', 'GU': '+1 671',
+  'IM': '+44', 'JE': '+44', 'MO': '+853', 'MQ': '+596',
+  'YT': '+262', 'MS': '+1 664', 'NC': '+687', 'NU': '+683', 'NF': '+672',
+  'MP': '+1 670', 'RE': '+262', 'SH': '+290', 'PM': '+508', 'TC': '+1 649',
+  'TK': '+690', 'WF': '+681', 'EH': '+212',
+
 };

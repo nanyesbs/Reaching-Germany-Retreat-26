@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode }) => {
       <div className="absolute top-8 right-8 z-20 hidden md:block">
         <img
           src={darkMode ? "/logo-dark.png" : "/logo-light.png"}
-          alt="Leaders' Summit Logo"
+          alt="Reaching Germany Retreat 26 Logo"
           className="h-16 w-auto object-contain"
         />
       </div>
@@ -35,8 +35,8 @@ const Header: React.FC<HeaderProps> = ({ darkMode }) => {
         </span>
 
         <h1 className="text-4xl md:text-7xl font-extrabold text-white dark:text-black uppercase leading-tight mb-6">
-          LEADERS' <br />
-          <span className="tracking-tighter">SUMMIT '26</span>
+          REACHING <br />
+          <span className="tracking-tighter">GERMANY RETREAT 26</span>
         </h1>
 
         <div className="w-24 h-[2px] bg-[#BB9446] mb-3" />

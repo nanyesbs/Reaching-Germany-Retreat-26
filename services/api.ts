@@ -1,5 +1,4 @@
 import { Participant } from '../types';
-import { fixEncoding } from '../utils';
 import { supabase } from './supabase';
 
 export const api = {
@@ -17,14 +16,9 @@ export const api = {
   },
 
   addParticipant: async (participant: Omit<Participant, 'id'>): Promise<Participant> => {
-    const newParticipant = {
-      ...participant,
-      id: Math.random().toString(36).substring(2, 7).toUpperCase(),
-    };
-
     const { data, error } = await supabase
       .from('participants')
-      .insert([newParticipant])
+      .insert([participant])
       .select()
       .single();
 
@@ -72,16 +66,6 @@ export const api = {
     if (error) throw error;
   },
 
-  resetData: async (): Promise<void> => {
-    // Caution: This deletes everything
-    const { error } = await supabase
-      .from('participants')
-      .delete()
-      .neq('id', '0'); // Safe way to clear all if allowed by RLS
-
-    if (error) throw error;
-  },
-
   getSettings: async (): Promise<Record<string, string>> => {
     const { data, error } = await supabase.from('settings').select('*');
     if (error) return {};
@@ -105,34 +89,5 @@ export const api = {
       .getPublicUrl(data.path);
 
     return publicUrl;
-  },
-
-  saveLeader: async (leaderData: any): Promise<void> => {
-    // Map to lowercase keys to match the 'leaders' table schema created in SQL
-    const payload = {
-      email: leaderData.email,
-      fullname: leaderData.name,
-      residentcountry: leaderData.country?.name,
-      nationality: leaderData.nationality?.name,
-      shortbio: leaderData.shortBio, // corrected
-      profilepicture: leaderData.photoUrl,
-      ministryname: leaderData.organization,
-      roles: leaderData.title,
-      ministrydescription: leaderData.orgDescription,
-      promopicture: leaderData.promoPhotoUrl,
-      phone: leaderData.phone,
-      contactemail: leaderData.contactEmail, // corrected
-      website: leaderData.website,
-      othercontact: leaderData.otherInfo,
-      testimony: leaderData.testimony,
-      upcomingevents: leaderData.upcomingEvents, // corrected
-      dietaryrestrictions: leaderData.dietaryRestrictions // corrected
-    };
-
-    const { error } = await supabase
-      .from('leaders')
-      .insert([payload]);
-
-    if (error) throw error;
   }
 };

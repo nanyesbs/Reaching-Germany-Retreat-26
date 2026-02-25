@@ -14,9 +14,11 @@ import { api } from './services/api';
 import { COUNTRY_LIST, ALPHABET_GROUPS } from './constants';
 import { sortParticipants, normalizeString, convertDriveUrl, findCountry, processParticipant } from './utils';
 import { syncService } from './services/syncService';
+import { useTranslation } from 'react-i18next';
 import { Search, ShieldCheck, Users, Loader2, LayoutGrid, Moon, Sun, Globe, Building, Briefcase, Rows, Columns, Square, Filter, RefreshCcw, X } from 'lucide-react';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('directory');
@@ -223,70 +225,71 @@ const App: React.FC = () => {
 
           {viewMode === 'directory' && <Header darkMode={darkMode} />}
 
-          <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-24 md:py-32">
-            <div className="flex flex-col gap-20 mb-32">
+          <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-20 md:py-32">
+            <div className="flex flex-col gap-10 md:gap-20 mb-20 md:mb-32">
               {viewMode === 'directory' && (
-                <div className="flex flex-col gap-10">
-                  {/* ... */}
+                <div className="flex flex-col gap-6 md:gap-10">
                   {/* Refined Control Bar */}
-                  <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 bg-white/5 dark:bg-black/5 p-4 rounded-3xl border border-white/10 dark:border-black/5 backdrop-blur-md">
+                  <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 bg-white/5 dark:bg-black/5 p-3 md:p-4 rounded-3xl border border-white/10 dark:border-black/5 backdrop-blur-md">
                     <div className="relative flex-1 group">
                       <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-heaven-gold group-focus-within:scale-110 transition-transform" />
                       <input
                         type="text"
-                        placeholder="Search participants, roles, or organizations..."
-                        className="w-full bg-transparent border-none p-4 pl-12 text-sm font-avenir-medium text-white dark:text-black outline-none transition-all placeholder:text-white/20 dark:placeholder:text-black/20"
+                        placeholder={t('search.placeholder', 'Search participants...')}
+                        className="w-full bg-transparent border-none p-3 md:p-4 pl-12 text-sm font-avenir-medium text-white dark:text-black outline-none transition-all placeholder:text-white/20 dark:placeholder:text-black/20"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 h-full px-2">
-                      <button
-                        onClick={() => performBackgroundSync()}
-                        title="Manual Refresh"
-                        className="p-3 text-brand-heaven-gold/60 hover:text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5 rounded-xl transition-all active:scale-95"
-                      >
-                        <RefreshCcw size={18} />
-                      </button>
+                    <div className="flex items-center justify-between xl:justify-end gap-2 h-full px-2">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => performBackgroundSync()}
+                          title="Manual Refresh"
+                          className="p-3 text-brand-heaven-gold/60 hover:text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5 rounded-xl transition-all active:scale-95"
+                        >
+                          <RefreshCcw size={18} />
+                        </button>
 
-                      <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-2 hidden md:block" />
+                        <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-1 hidden sm:block" />
 
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setLayoutMode('list')}
-                          className={`p-3 rounded-xl transition-all ${layoutMode === 'list' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
-                          title="List View"
-                        >
-                          <Square size={20} />
-                        </button>
-                        <button
-                          onClick={() => setLayoutMode('grid2')}
-                          className={`p-3 rounded-xl transition-all ${layoutMode === 'grid2' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
-                          title="2 Column Grid"
-                        >
-                          <Columns size={20} />
-                        </button>
-                        <button
-                          onClick={() => setLayoutMode('grid4')}
-                          className={`p-3 rounded-xl transition-all ${layoutMode === 'grid4' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
-                          title="4 Column Grid"
-                        >
-                          <LayoutGrid size={20} />
-                        </button>
+                        <div className="hidden sm:flex gap-1">
+                          <button
+                            onClick={() => setLayoutMode('list')}
+                            className={`p-3 rounded-xl transition-all ${layoutMode === 'list' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                            title="List View"
+                          >
+                            <Square size={20} />
+                          </button>
+                          <button
+                            onClick={() => setLayoutMode('grid2')}
+                            className={`p-3 rounded-xl transition-all ${layoutMode === 'grid2' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                            title="2 Column Grid"
+                          >
+                            <Columns size={20} />
+                          </button>
+                          <button
+                            onClick={() => setLayoutMode('grid4')}
+                            className={`p-3 rounded-xl transition-all ${layoutMode === 'grid4' ? 'bg-brand-heaven-gold text-white shadow-glow' : 'text-brand-heaven-gold hover:bg-white/5 dark:hover:bg-black/5'}`}
+                            title="4 Column Grid"
+                          >
+                            <LayoutGrid size={20} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-2" />
+                      <div className="w-[1px] h-8 bg-white/10 dark:bg-black/10 mx-1" />
 
                       <button
                         onClick={() => setIsFilterDrawerOpen(true)}
-                        className={`flex items-center gap-3 px-6 py-4 rounded-xl font-avenir-bold text-[10px] uppercase tracking-[3px] transition-all active:scale-95 ${filterCountryCode !== 'ALL' || filterMinistry !== 'ALL' || filterRole !== 'ALL' || filterLetter !== 'ALL'
+                        className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 rounded-xl font-avenir-bold text-[9px] md:text-[10px] uppercase tracking-[2px] md:tracking-[3px] transition-all active:scale-95 ${filterCountryCode !== 'ALL' || filterMinistry !== 'ALL' || filterRole !== 'ALL' || filterLetter !== 'ALL'
                           ? 'bg-brand-heaven-gold text-white shadow-glow'
                           : 'bg-white/5 dark:bg-black/5 text-brand-heaven-gold border border-brand-heaven-gold/20'
                           }`}
                       >
                         <Filter size={14} />
-                        <span>Filtros</span>
+                        <span className="hidden xs:inline">{t('filters.title', 'Filters')}</span>
                         {(filterCountryCode !== 'ALL' || filterMinistry !== 'ALL' || filterRole !== 'ALL' || filterLetter !== 'ALL') && (
                           <span className="w-2 h-2 rounded-full bg-white shadow-glow animate-pulse" />
                         )}
@@ -295,13 +298,13 @@ const App: React.FC = () => {
                   </div>
 
                   {/* Enhanced Alphabet Scroll */}
-                  <div className="py-2 mb-4">
+                  <div className="py-2">
                     <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-2 px-1">
                       <button
                         onClick={() => setFilterLetter('ALL')}
-                        className={`h-10 px-6 shrink-0 flex items-center justify-center text-[10px] font-avenir-bold tracking-[2px] rounded-full border transition-all ${filterLetter === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold shadow-glow' : 'text-white/40 dark:text-black/40 border-white/10 dark:border-black/5 hover:border-brand-heaven-gold/50'}`}
+                        className={`h-9 px-5 shrink-0 flex items-center justify-center text-[9px] font-avenir-bold tracking-[2px] rounded-full border transition-all ${filterLetter === 'ALL' ? 'bg-brand-heaven-gold text-white border-brand-heaven-gold shadow-glow' : 'text-white/40 dark:text-black/40 border-white/10 dark:border-black/5 hover:border-brand-heaven-gold/50'}`}
                       >
-                        ALL PARTICIPANTS
+                        {t('filters.all', 'ALL')}
                       </button>
                       {ALPHABET_GROUPS.LATIN.map(char => {
                         const isAvailable = availableLetters.has(char);
@@ -310,7 +313,7 @@ const App: React.FC = () => {
                             key={char}
                             onClick={() => setFilterLetter(char)}
                             disabled={!isAvailable}
-                            className={`w-10 h-10 shrink-0 flex items-center justify-center text-[11px] font-avenir-bold rounded-full transition-all ${filterLetter === char
+                            className={`w-9 h-9 shrink-0 flex items-center justify-center text-[10px] font-avenir-bold rounded-full transition-all ${filterLetter === char
                               ? 'bg-white dark:bg-black text-black dark:text-white shadow-glow-sm'
                               : isAvailable
                                 ? 'text-white/60 dark:text-black/60 hover:bg-white/10 dark:hover:bg-black/10 hover:text-white dark:hover:text-black border border-white/5'
@@ -330,12 +333,14 @@ const App: React.FC = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-40">
                 <Loader2 className="animate-spin text-brand-heaven-gold mb-4" size={32} />
-                <p className="text-[10px] text-brand-heaven-gold uppercase font-avenir-medium tracking-widest">Synchronizing Identity Stream...</p>
+                <p className="text-[10px] text-brand-heaven-gold uppercase font-avenir-medium tracking-widest text-center px-4">
+                  {t('loading.sync', 'Synchronizing Identity Stream...')}
+                </p>
               </div>
             ) : viewMode === 'directory' ? (
               <div className="flex flex-col">
                 {/* Results Grid - Dynamic Columns */}
-                <div className={`grid gap-6 md:gap-10 ${layoutMode === 'grid4' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
+                <div className={`grid gap-4 md:gap-10 ${layoutMode === 'grid4' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
                   layoutMode === 'grid2' ? 'grid-cols-1 sm:grid-cols-2' :
                     'grid-cols-1'
                   }`}>

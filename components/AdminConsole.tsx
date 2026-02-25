@@ -424,17 +424,17 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Paste Google Sheet URL"
-                className="bg-black/20 dark:bg-white border border-white/10 dark:border-stone-200 px-4 py-2 rounded-button text-[10px] w-64 outline-none focus:border-brand-heaven-gold text-white dark:text-black"
+                className="bg-black/20 dark:bg-white border border-white/10 dark:border-stone-200 px-4 py-2 rounded-button text-[10px] w-full sm:w-64 outline-none focus:border-brand-heaven-gold text-white dark:text-black"
                 value={sheetUrl}
                 onChange={(e) => setSheetUrl(e.target.value)}
               />
               <button
                 onClick={handleCloudSync}
-                className="px-6 py-2 bg-brand-heaven-gold/20 text-brand-heaven-gold border border-brand-heaven-gold/20 rounded-button text-[10px] font-avenir-bold uppercase hover:bg-brand-heaven-gold/30 transition-all flex items-center gap-2"
+                className="px-6 py-2 bg-brand-heaven-gold/20 text-brand-heaven-gold border border-brand-heaven-gold/20 rounded-button text-[10px] font-avenir-bold uppercase hover:bg-brand-heaven-gold/30 transition-all flex items-center justify-center gap-2"
               >
                 <Sparkles size={14} /> Cloud Sync
               </button>
@@ -505,7 +505,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
 
         {/* Editor Form Modal */}
         {isAdding && (
-          <div className="w-full lg:w-[600px] bg-black dark:bg-white border border-brand-heaven-gold/40 rounded-card shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-fade-in sticky top-24">
+          <div className="w-full lg:w-[600px] bg-black dark:bg-white border border-brand-heaven-gold/40 rounded-card shadow-2xl flex flex-col max-h-[90vh] lg:max-h-[85vh] overflow-hidden animate-fade-in sticky top-4 lg:top-24 z-[300]">
             <div className="flex justify-between items-center p-6 border-b border-white/10 dark:border-stone-100 bg-white/5 dark:bg-stone-50">
               <h4 className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[0.2em]">
                 {editingId ? 'Modify Identity' : 'Initialize New Entry'}
@@ -513,8 +513,8 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               <button onClick={() => { setIsAdding(false); onSetEditingId(null); setFormData({}); }} className="hover:rotate-90 transition-all duration-300"><X size={20} className="text-white/20 dark:text-stone-400" /></button>
             </div>
 
-            <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
-              <div className="grid grid-cols-2 gap-6 p-4 bg-white/5 dark:bg-black/5 rounded-card border border-white/5">
+            <div className="p-4 md:p-8 overflow-y-auto custom-scrollbar space-y-6 md:space-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 p-4 bg-white/5 dark:bg-black/5 rounded-card border border-white/5">
                 <div className="space-y-3">
                   <label className="text-[8px] font-avenir-bold text-brand-heaven-gold uppercase tracking-widest">Portrait URL or Upload</label>
                   <div className="flex flex-col gap-2">
@@ -564,7 +564,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Full Name</label>
                   <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Residency</label>
                     <select className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-2 rounded-button text-[11px] text-white dark:text-black outline-none" value={formData.country?.code || ''} onChange={(e) => selectCountry('country', e.target.value)}>
@@ -576,7 +576,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                     <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.state || ''} onChange={e => setFormData({ ...formData, state: e.target.value })} placeholder="Optional" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">City</label>
                     <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.city || ''} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="Optional" />
@@ -596,7 +596,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Full Testimony</label>
                   <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[120px] resize-none" value={formData.testimony || ''} onChange={e => setFormData({ ...formData, testimony: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Organization</label>
                     <input className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.organization || ''} onChange={e => setFormData({ ...formData, organization: e.target.value })} />
@@ -610,7 +610,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Ministry / Organization Description</label>
                   <textarea className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold min-h-[60px] resize-none" value={formData.orgDescription || ''} onChange={e => setFormData({ ...formData, orgDescription: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-avenir-bold text-brand-heaven-gold tracking-widest">Registration Email</label>
                     <input type="email" className="w-full bg-white/5 dark:bg-stone-50 border border-white/10 dark:border-stone-200 p-3 rounded-button text-xs text-white dark:text-black outline-none focus:border-brand-heaven-gold" value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />

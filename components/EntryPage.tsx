@@ -45,7 +45,7 @@ const EntryPage: React.FC<EntryPageProps> = ({ onVerify }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[500] bg-black flex items-center justify-center p-6 overflow-hidden select-none">
+        <div className="fixed inset-0 z-[500] bg-black flex items-center justify-center p-6 overflow-hidden">
             {/* Cinematic Background Elements */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(187,148,70,0.05),transparent_70%)]" />
@@ -91,14 +91,14 @@ const EntryPage: React.FC<EntryPageProps> = ({ onVerify }) => {
                     {/* Access Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="relative group">
-                            <div className={`absolute inset-0 bg-brand-heaven-gold/5 rounded-2xl transition-all duration-300 ${error ? 'bg-red-500/10' : 'group-focus-within:bg-brand-heaven-gold/10'
+                            <div className={`absolute inset-0 bg-brand-heaven-gold/5 rounded-2xl transition-all duration-300 pointer-events-none ${error ? 'bg-red-500/10' : 'group-focus-within:bg-brand-heaven-gold/10'
                                 }`} />
                             <input
                                 type="password"
                                 placeholder={t('entry.accessCode', 'ACCESS CODE')}
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                className={`w-full bg-transparent border-none p-6 text-center text-sm font-avenir-bold tracking-[0.3em] text-white uppercase outline-none focus:ring-0 placeholder:text-white/20 transition-all ${error ? 'text-red-500 placeholder:text-red-500/20' : ''
+                                className={`relative z-10 w-full bg-transparent border-none p-6 text-center text-sm font-avenir-bold tracking-[0.3em] text-white uppercase outline-none focus:ring-0 placeholder:text-white/20 transition-all ${error ? 'text-red-500 placeholder:text-red-500/20' : ''
                                     }`}
                                 autoFocus
                             />
@@ -109,8 +109,8 @@ const EntryPage: React.FC<EntryPageProps> = ({ onVerify }) => {
                         <button
                             disabled={loading || !code}
                             className={`w-full py-5 rounded-2xl font-avenir-bold text-[10px] uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-2 group ${loading || !code
-                                    ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                                    : 'bg-white text-black hover:bg-brand-heaven-gold hover:text-white shadow-glow active:scale-95'
+                                ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                                : 'bg-white text-black hover:bg-brand-heaven-gold hover:text-white shadow-glow active:scale-95'
                                 }`}
                         >
                             {loading ? (

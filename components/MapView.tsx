@@ -16,13 +16,55 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Create a custom minimalist gold marker
-const goldIcon = new L.DivIcon({
-    className: 'custom-div-icon',
-    html: `<div style="background-color: #BB9446; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 12px 2px rgba(187, 148, 70, 0.8), 0 0 24px 4px rgba(187, 148, 70, 0.4); opacity: 0.9;"></div>`,
-    iconSize: [8, 8],
-    iconAnchor: [4, 4]
-});
+// Create a custom dynamic marker with the participant's photo
+const createParticipantIcon = (participant: Participant, count: number) => {
+    const defaultImg = getIdentityPlaceholder(participant.name);
+    const imgSrc = participant.photoUrl || defaultImg;
+
+    let html = `
+        <div style="
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #BB9446;
+            box-shadow: 0 0 12px 2px rgba(187, 148, 70, 0.6);
+            background-color: #111;
+            overflow: visible;
+        ">
+            <img src="${imgSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; opacity: 0.9;" onerror="this.src='${defaultImg}'" />
+    `;
+
+    if (count > 1) {
+        html += `
+            <div style="
+                position: absolute;
+                bottom: -6px;
+                right: -6px;
+                background: #BB9446;
+                color: white;
+                font-size: 10px;
+                font-weight: bold;
+                border-radius: 10px;
+                padding: 1px 5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+                font-family: Arial, sans-serif;
+                z-index: 10;
+            ">
+                +${count - 1}
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+
+    return new L.DivIcon({
+        className: 'custom-participant-icon',
+        html: html,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+};
 
 interface MapViewProps {
     participants: Participant[];
@@ -107,7 +149,7 @@ const MapView: React.FC<MapViewProps> = ({ participants, onSelectCity }) => {
                     <Marker
                         key={idx}
                         position={marker.coords}
-                        icon={goldIcon}
+                        icon={createParticipantIcon(marker.participants[0], marker.participants.length)}
                         eventHandlers={{
                             click: () => onSelectCity(marker.city) // Optional: Keep this to auto-filter, or let user click button in popup
                         }}

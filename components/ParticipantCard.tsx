@@ -66,6 +66,12 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({ participant, onClick,
             <div className="flex items-center gap-3">
               <div className="flex gap-1 items-center bg-black/40 dark:bg-stone-100 p-1.5 px-3 rounded-full border border-white/10 dark:border-stone-200">
                 <span className="text-lg leading-none" title="Residency">{participant.country.flag}</span>
+                {participant.nationality.code !== participant.country.code && (
+                  <>
+                    <span className="text-white/20 text-xs mx-0.5">·</span>
+                    <span className="text-lg leading-none" title="Nationality">{participant.nationality.flag}</span>
+                  </>
+                )}
                 <span className="text-[10px] font-avenir-bold text-white/60 dark:text-black/60">
                   {[participant.city, participant.country.code].filter(Boolean).join(', ')}
                 </span>
@@ -117,9 +123,26 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({ participant, onClick,
         </h3>
 
         {/* 3. Role */}
-        <p className="text-[10px] md:text-xs font-avenir-medium text-brand-heaven-gold mb-4 uppercase tracking-[3px] opacity-90 group-hover:opacity-100 transition-opacity">
+        <p className="text-[10px] md:text-xs font-avenir-medium text-brand-heaven-gold mb-3 uppercase tracking-[3px] opacity-90 group-hover:opacity-100 transition-opacity">
           {participant.title}
         </p>
+
+        {/* 3b. Flags (Residency + Nationality) */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-xl leading-none" title={`Residency: ${participant.country.name}`}>{participant.country.flag}</span>
+            <span className="text-[6px] font-avenir-bold text-white/30 dark:text-black/30 uppercase tracking-widest">{participant.country.code}</span>
+          </div>
+          {participant.nationality.code !== participant.country.code && (
+            <>
+              <span className="text-white/10 dark:text-black/10 text-xs">·</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-xl leading-none" title={`Nationality: ${participant.nationality.name}`}>{participant.nationality.flag}</span>
+                <span className="text-[6px] font-avenir-bold text-white/30 dark:text-black/30 uppercase tracking-widest">{participant.nationality.code}</span>
+              </div>
+            </>
+          )}
+        </div>
 
         {/* 4. Organization */}
         <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-white/50 dark:text-black/50 font-avenir-roman mb-8 min-h-[1.5rem] w-full px-2">

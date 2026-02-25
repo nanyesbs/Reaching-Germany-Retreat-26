@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Participant } from '../types';
-import { X, Mail, Globe, Phone, User, Sparkles, Shield, Building2, Info, Maximize2 } from 'lucide-react';
+import { X, Mail, Globe, Phone, User, Sparkles, Shield, Building2, Info, Maximize2, Flag, MapPin } from 'lucide-react';
 import { getIdentityPlaceholder, HIGH_QUALITY_PLACEHOLDER } from '../constants';
 
 interface ProfileModalProps {
@@ -166,16 +166,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                     <div className="px-4 py-1.5 bg-brand-heaven-gold/5 dark:bg-stone-50 rounded-full border border-brand-heaven-gold/20 flex items-center gap-3">
                       <span className="text-xl leading-none">{participant.country.flag}</span>
                       <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">
-                        {[participant.city, participant.state, participant.country.name].filter(Boolean).join(', ')}
+                        Residency: {[participant.city, participant.state, participant.country.name].filter(Boolean).join(', ')}
                       </span>
                     </div>
                   </div>
-                  {participant.nationality.code !== participant.country.code && (
-                    <div className="px-4 py-1.5 bg-white/5 dark:bg-stone-100 rounded-full border border-white/5 dark:border-stone-200 flex items-center gap-3">
-                      <span className="text-xl leading-none">{participant.nationality.flag}</span>
-                      <span className="text-[10px] font-avenir-bold text-white/40 dark:text-black/40 uppercase tracking-[2px]">Heritage</span>
-                    </div>
-                  )}
+                  <div className="px-4 py-1.5 bg-white/5 dark:bg-stone-100 rounded-full border border-white/5 dark:border-stone-200 flex items-center gap-3">
+                    <span className="text-xl leading-none">{participant.nationality.flag}</span>
+                    <span className="text-[10px] font-avenir-bold text-white/40 dark:text-black/40 uppercase tracking-[2px]">Nationality: {participant.nationality.name}</span>
+                  </div>
                 </div>
 
                 <h2 className="text-5xl lg:text-7xl font-extrabold text-white dark:text-black leading-[0.9] mb-8 uppercase tracking-tighter">
@@ -201,12 +199,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   <p className="text-lg font-didot italic text-brand-heaven-gold mb-1">{participant.title}</p>
                   <p className="text-[11px] font-avenir-bold text-white/50 dark:text-stone-400 uppercase tracking-widest leading-relaxed">
                     {participant.organization}
-                    {participant.nationality.code !== participant.country.code && (
-                      <span className="ml-2 pl-2 border-l border-white/10 uppercase tracking-widest opacity-60">
-                        Heritage: {participant.nationality.name}
-                      </span>
-                    )}
                   </p>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl leading-none">{participant.country.flag}</span>
+                      <span className="text-[10px] font-avenir-bold text-brand-heaven-gold uppercase tracking-[2px]">
+                        Residency: {[participant.city, participant.country.name].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl leading-none">{participant.nationality.flag}</span>
+                      <span className="text-[10px] font-avenir-bold text-white/40 dark:text-black/40 uppercase tracking-[2px]">
+                        Nationality: {participant.nationality.name}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -241,8 +248,26 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   </div>
                 )}
 
-                {/* Comms Grid */}
+                {/* Identity & Comms Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 dark:bg-stone-100 border border-white/10 dark:border-stone-100 rounded-3xl md:rounded-[2rem] overflow-hidden shadow-2xl">
+                  {/* Residency */}
+                  <div className="bg-[#0f0f0f] dark:bg-white p-5 md:p-8 flex flex-col gap-3 group transition-colors hover:bg-white/5 dark:hover:bg-stone-50">
+                    <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><MapPin size={10} /> Residency</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg leading-none">{participant.country.flag}</span>
+                      <span className="text-sm font-avenir-medium text-white dark:text-black">
+                        {[participant.city, participant.state, participant.country.name].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Nationality */}
+                  <div className="bg-[#0f0f0f] dark:bg-white p-5 md:p-8 flex flex-col gap-3 group transition-colors hover:bg-white/5 dark:hover:bg-stone-50">
+                    <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><Flag size={10} /> Nationality</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg leading-none">{participant.nationality.flag}</span>
+                      <span className="text-sm font-avenir-medium text-white dark:text-black">{participant.nationality.name}</span>
+                    </div>
+                  </div>
                   <div className="bg-[#0f0f0f] dark:bg-white p-5 md:p-8 flex flex-col gap-3 group transition-colors hover:bg-white/5 dark:hover:bg-stone-50">
                     <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><Phone size={10} /> Phone Number</span>
                     <a href={`tel:${participant.phone}`} className="text-sm font-avenir-medium text-white dark:text-black group-hover:text-brand-heaven-gold transition-colors">{participant.phone || 'Communication Pend.'}</a>
@@ -260,7 +285,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                     ) : <span className="text-xs italic opacity-20">Offline</span>}
                   </div>
                   <div className="bg-[#0f0f0f] dark:bg-white p-5 md:p-8 flex flex-col gap-3 group transition-colors hover:bg-white/5 dark:hover:bg-stone-50">
-                    <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><Info size={10} /> Other</span>
+                    <span className="text-[8px] font-avenir-bold text-brand-heaven-gold/60 uppercase tracking-widest flex items-center gap-2"><Info size={10} /> Other Info</span>
                     <p className="text-sm font-avenir-medium text-white dark:text-black">{participant.otherInfo || 'Standard'}</p>
                   </div>
                 </div>

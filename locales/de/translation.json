@@ -104,7 +104,7 @@
             "selectCountry": "Land auswählen",
             "state": "Bundesland / Provinz",
             "city": "Stadt (Hauptstandort)",
-            "bio": "neue Bio *",
+            "bio": "Short Bio *",
             "bioPlaceholder": "Max. 400 Zeichen",
             "bioNote": "HINWEIS: DIESE INFO KANN VON UNSEREM TEAM GEGEBENENFALLS BEARBEITET/GEKÜRZT WERDEN.",
             "charCount": "Zeichen übrig"

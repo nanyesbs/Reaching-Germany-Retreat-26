@@ -230,7 +230,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ participant, onClose, isAdm
                   <div className="relative">
                     <div className="absolute -left-4 top-0 bottom-0 w-[1px] bg-gradient-to-b from-brand-heaven-gold/40 via-transparent to-transparent" />
                     <p className="text-[15px] md:text-[17px] font-avenir-roman leading-relaxed text-white/80 dark:text-stone-600 first-letter:text-5xl first-letter:font-didot first-letter:mr-3 first-letter:float-left first-letter:text-brand-heaven-gold first-letter:leading-[0.7] first-letter:pt-1">
-                      {participant.testimony}
+                      {participant.shortBio || participant.testimony || '—'}
                     </p>
                   </div>
                 </div>

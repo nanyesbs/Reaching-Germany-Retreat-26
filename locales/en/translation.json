@@ -103,7 +103,7 @@
             "selectCountry": "Select country",
             "state": "State / Province",
             "city": "City (Primary Location)",
-            "bio": "new Bio *",
+            "bio": "Short Bio *",
             "bioPlaceholder": "Max 400 characters",
             "bioNote": "NOTE: THIS INFO MIGHT BE EDITED/SHORTENED BY OUR TEAM IF NECESSARY.",
             "charCount": "characters left"

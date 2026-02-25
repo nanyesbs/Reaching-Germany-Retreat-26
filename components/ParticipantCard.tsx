@@ -66,7 +66,9 @@ const ParticipantCard: React.FC<ParticipantCardProps> = ({ participant, onClick,
             <div className="flex items-center gap-3">
               <div className="flex gap-1 items-center bg-black/40 dark:bg-stone-100 p-1.5 px-3 rounded-full border border-white/10 dark:border-stone-200">
                 <span className="text-lg leading-none" title="Residency">{participant.country.flag}</span>
-                <span className="text-[10px] font-avenir-bold text-white/60 dark:text-black/60">{participant.country.code}</span>
+                <span className="text-[10px] font-avenir-bold text-white/60 dark:text-black/60">
+                  {[participant.city, participant.country.code].filter(Boolean).join(', ')}
+                </span>
               </div>
               <ChevronRight size={16} className="text-brand-heaven-gold/40 group-hover:text-brand-heaven-gold group-hover:translate-x-1 transition-all" />
             </div>

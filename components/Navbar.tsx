@@ -61,8 +61,8 @@ const Navbar: React.FC<NavbarProps> = ({
                                 key={item.mode}
                                 onClick={() => setViewMode(item.mode)}
                                 className={`text-[10px] font-avenir-bold uppercase flex items-center gap-2 transition-all ${item.isButton
-                                        ? `px-4 py-1.5 rounded-button border ${viewMode === item.mode ? 'bg-brand-heaven-gold border-brand-heaven-gold text-white shadow-glow-sm' : 'border-white/10 dark:border-black/10 text-brand-heaven-gold hover:bg-brand-heaven-gold/10'}`
-                                        : viewMode === item.mode ? 'text-brand-heaven-gold' : 'text-white/40 dark:text-black/40 hover:text-white dark:hover:text-black'
+                                    ? `px-4 py-1.5 rounded-button border ${viewMode === item.mode ? 'bg-brand-heaven-gold border-brand-heaven-gold text-white shadow-glow-sm' : 'border-white/10 dark:border-black/10 text-brand-heaven-gold hover:bg-brand-heaven-gold/10'}`
+                                    : viewMode === item.mode ? 'text-brand-heaven-gold' : 'text-white/40 dark:text-black/40 hover:text-white dark:hover:text-black'
                                     }`}
                             >
                                 <item.icon size={14} /> {item.label}
@@ -106,8 +106,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 </div>
             </div>
 
-            {/* Mobile Menu Overlay */}
-            <div className={`fixed inset-0 top-[60px] z-[90] bg-black/95 dark:bg-white/95 backdrop-blur-2xl transition-all duration-500 lg:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            {/* Mobile Menu Slide-Down Bar */}
+            <div className={`fixed inset-x-0 top-[56px] md:top-[72px] bottom-0 z-[90] bg-black/95 dark:bg-white/95 backdrop-blur-2xl transition-transform duration-500 ease-in-out lg:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'
                 }`}>
                 <div className="flex flex-col p-8 gap-6 h-full overflow-y-auto">
                     <div className="pb-6 border-b border-white/10 dark:border-black/5">

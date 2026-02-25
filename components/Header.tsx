@@ -10,14 +10,14 @@ const Header: React.FC<HeaderProps> = ({ darkMode }) => {
     <header className="relative w-full h-[40vh] flex flex-col items-center justify-center overflow-hidden bg-black dark:bg-white transition-colors duration-500">
       {/* Background Image with Overlay */}
       <div
-        className="absolute inset-0 z-0 opacity-40 grayscale"
+        className="absolute inset-0 z-0 opacity-70"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop")',
+          backgroundImage: 'url("/header-bg.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       />
-      <div className={`absolute inset-0 z-10 bg-gradient-to-b from-transparent ${darkMode ? 'via-white/50 to-white' : 'via-black/50 to-black'}`} />
+      <div className={`absolute inset-0 z-10 bg-gradient-to-b from-transparent ${darkMode ? 'via-white/70 to-white' : 'via-black/70 to-black'}`} />
 
       {/* SVG Logo (Top Right) */}
       <div className="absolute top-8 right-8 z-20 hidden md:block">
@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode }) => {
         <div className="w-24 h-[2px] bg-[#BB9446] mb-3" />
 
         <p className="text-sm md:text-lg font-normal text-white/90 dark:text-black/90 tracking-widest uppercase">
-          24.02.26 – 26.02.26 | Stuttgart, DE
+          24.02.26 – 26.02.26
         </p>
       </div>
     </header>
